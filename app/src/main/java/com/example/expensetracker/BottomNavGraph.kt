@@ -1,13 +1,13 @@
 package com.example.expensetracker
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.expensetracker.Views.BudgetScreen
-import com.example.expensetracker.Views.NewScreen
-import com.example.expensetracker.Views.ReportScreen
+import com.example.expensetracker.views.BudgetScreen
+import com.example.expensetracker.views.HomeScreen
+import com.example.expensetracker.views.NewScreen
+import com.example.expensetracker.views.ReportScreen
 
 @Composable
 fun BottomNavGraph(navController: NavHostController) {
