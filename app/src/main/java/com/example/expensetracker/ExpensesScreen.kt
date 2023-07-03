@@ -14,10 +14,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.expensetracker.views.ExpenseItem
 
 @Composable
-fun ExpensesScreen() {
+fun ExpensesScreen(onClick:()->Unit) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -31,7 +30,7 @@ fun ExpensesScreen() {
                 color = Color(0xFF0D0E0F),
                 modifier = Modifier.padding(16.dp)
             )
-            ExpensesList(3)
+            ExpensesList(3, onClick)
             Text(
                 "Yesterday",
                 fontWeight = FontWeight(600),
@@ -39,16 +38,16 @@ fun ExpensesScreen() {
                 color = Color(0xFF0D0E0F),
                 modifier = Modifier.padding(16.dp)
             )
-            ExpensesList(3)
+            ExpensesList(3, onClick)
         }
     }
 }
 
 @Composable
-fun ExpensesList(count: Int) {
+fun ExpensesList(count: Int, onClick:()->Unit) {
     LazyColumn {
         items(count) {
-            ExpenseItem()
+            ExpenseItem(onClick)
         }
     }
 }
@@ -56,5 +55,5 @@ fun ExpensesList(count: Int) {
 @Preview(showBackground = true)
 @Composable
 fun ListPreview() {
-    ExpensesScreen()
+    ExpensesScreen({ print("z") })
 }

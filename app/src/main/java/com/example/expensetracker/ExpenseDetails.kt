@@ -1,18 +1,14 @@
-package com.example.expensetracker.views
+package com.example.expensetracker
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
 @Composable
-fun NewScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text = "New")
+fun ExpenseDetails (){
+    Box(modifier = Modifier.fillMaxSize()){
+        Text(text = "Details")
     }
 }

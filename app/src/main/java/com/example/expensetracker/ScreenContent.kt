@@ -1,7 +1,8 @@
-package com.example.expensetracker.views
+package com.example.expensetracker
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
@@ -12,11 +13,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.expensetracker.ExpensesList
-import com.example.expensetracker.R
 
 private val color_item_bg = Color(0xfff1f1fa)
 
@@ -24,7 +22,7 @@ private val color_item_bg = Color(0xfff1f1fa)
 
 
 @Composable
-fun HomeScreen() {
+fun ScreenContent(onClick : ()->Unit) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -32,7 +30,7 @@ fun HomeScreen() {
         Column {
             CurrencyChange()
             Balance(1000.00f, 10.00f)
-            TodayExpenses()
+            TodayExpenses(onClick)
         }
     }
 }
@@ -45,29 +43,29 @@ fun CurrencyChange(){
         modifier = Modifier.padding(8.dp)
     ) {
         Text(
-        text = "Exchange",
-        color = Color(0xFF91919F),
-        textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth()
-    )
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ){
-        Text(
-            text = "1€ = ",
-            fontSize = 20.sp,
-            fontWeight = FontWeight(600),
+            text = "Exchange",
+            color = Color(0xFF91919F),
             textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth()
         )
-        Text(
-            text = "28,39₺",
-            fontSize = 20.sp,
-            fontWeight = FontWeight(600),
-            textAlign = TextAlign.Center,
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ){
+            Text(
+                text = "1€ = ",
+                fontSize = 20.sp,
+                fontWeight = FontWeight(600),
+                textAlign = TextAlign.Center,
+            )
+            Text(
+                text = "28,39₺",
+                fontSize = 20.sp,
+                fontWeight = FontWeight(600),
+                textAlign = TextAlign.Center,
 
-        )
-    }
+                )
+        }
         Row(
             modifier = Modifier.fillMaxWidth()
                 .padding(0.dp, 0.dp, 0.dp, 16.dp),
@@ -181,36 +179,37 @@ fun Balance(amount: Float, spent: Float) {
 }
 
 @Composable
-fun TodayExpenses(){
+fun TodayExpenses(onClick: () -> Unit){
     Text(
         "Today's expenses",
         fontWeight = FontWeight(600),
         fontSize = 18.sp,
         color = Color(0xFF0D0E0F),
         modifier = Modifier.padding(8.dp)
-        )
-    ExpensesList(count = 3)
+    )
+    ExpensesList(count = 3, onClick = onClick)
 }
 
 
 //subcomponents
 @Composable
-fun ExpenseItem() {
+fun ExpenseItem(onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .padding(24.dp, 8.dp)
             .height(100.dp)
             .background(color_item_bg, shape = RoundedCornerShape(24.dp))
+            .clickable { onClick() }
 
     )
     {
         Row(modifier = Modifier.padding(16.dp)) {
-              val icon = painterResource(id = R.drawable.ic_expense_type)
-             Image(
-                 painter = icon, contentDescription = "expenseItem",
-                 modifier = Modifier
-                     .height(70.dp)
-                     .width(70.dp))
+            val icon = painterResource(id = R.drawable.ic_expense_type)
+            Image(
+                painter = icon, contentDescription = "expenseItem",
+                modifier = Modifier
+                    .height(70.dp)
+                    .width(70.dp))
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -261,8 +260,4 @@ fun ExpenseItem() {
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    HomeScreen()
-}
+

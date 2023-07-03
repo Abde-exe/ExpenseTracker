@@ -4,10 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.expensetracker.views.BudgetScreen
-import com.example.expensetracker.views.HomeScreen
-import com.example.expensetracker.views.NewScreen
-import com.example.expensetracker.views.ReportScreen
+
 
 @Composable
 fun BottomNavGraph(navController: NavHostController) {
@@ -20,7 +17,7 @@ fun BottomNavGraph(navController: NavHostController) {
             HomeScreen()
         }
         composable(route = BottomBarScreen.Expenses.route) {
-            ExpensesScreen()
+            ExpensesScreen(onClick = {})
         }
         composable(route = BottomBarScreen.NewExpense.route) {
             NewScreen()
