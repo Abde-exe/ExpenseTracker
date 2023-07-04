@@ -1,6 +1,5 @@
-package com.example.expensetracker
+package com.example.expensetracker.nav
 
-import android.graphics.drawable.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector

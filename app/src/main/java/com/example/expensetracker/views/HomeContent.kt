@@ -22,7 +22,7 @@ private val color_item_bg = Color(0xfff1f1fa)
 
 
 @Composable
-fun ScreenContent(onClick : ()->Unit) {
+fun HomeContent(onClick : ()->Unit) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center

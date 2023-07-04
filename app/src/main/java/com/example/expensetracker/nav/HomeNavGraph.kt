@@ -1,4 +1,4 @@
-package com.example.expensetracker
+package com.example.expensetracker.nav
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavGraphBuilder
@@ -6,7 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-
+import com.example.expensetracker.*
 
 
 @Composable
@@ -18,7 +18,7 @@ fun HomeNavGraph(navController: NavHostController) {
     ) {
 
         composable(route = BottomBarScreen.Home.route){
-            ScreenContent(onClick = {navController.navigate(Graph.DETAILS)})
+            HomeContent(onClick = {navController.navigate(Graph.DETAILS)})
         }
         composable(route = BottomBarScreen.Expenses.route) {
            ExpensesScreen(onClick = {navController.navigate(Graph.DETAILS)})
@@ -43,7 +43,7 @@ fun NavGraphBuilder.detailsNavGraph(navController: NavHostController) {
         startDestination = DetailsScreen.Information.route
     ) {
         composable(route = DetailsScreen.Information.route) {
-            ExpenseDetails()
+            ExpenseDetails(navController =  navController)
         }
     }
 }
