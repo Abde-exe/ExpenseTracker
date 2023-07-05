@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.expensetracker.nav.DetailsScreen
 
 private var header = Color(0xFFFD3C4A)
 private var textColor = Color(0xFFFCFCFC)
@@ -80,9 +79,7 @@ fun Header(navController: NavHostController) {
                 contentDescription = "arrowback",
                 tint = textColor,
                 modifier = Modifier.clickable {
-
                     navController.popBackStack()
-
                 }
             )
             Text(
@@ -192,19 +189,19 @@ fun Description() {
             fontWeight = FontWeight(600),
             color = subTextColor
         )
-        //  val painter = painterResource(id = R.drawable.rectangle_207)
-        /*   Image(
+          val painter = painterResource(id = R.drawable.rectangle_207)
+           Image(
                painter = painter,
                contentDescription = "imgasset",
                modifier = Modifier
                    .fillMaxWidth()
                    .height(120.dp)
-           )*/
+           )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun detailsPreview() {
+fun DetailsPreview() {
     ExpenseDetails(rememberNavController())
 }

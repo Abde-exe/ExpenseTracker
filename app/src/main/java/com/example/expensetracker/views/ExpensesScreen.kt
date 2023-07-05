@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.example.expensetracker.views.BottomSheet
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -27,7 +26,7 @@ fun ExpensesScreen(onClick: () -> Unit) {
         initialValue = BottomSheetValue.Collapsed
     )
     val scaffoldState = rememberBottomSheetScaffoldState(bottomSheetState = sheetState)
-    val scope = rememberCoroutineScope()
+
 
     BottomSheetScaffold(sheetShape = RoundedCornerShape(24.dp, 24.dp, 0.dp, 0.dp),
         sheetElevation = 20.dp,
@@ -36,13 +35,14 @@ fun ExpensesScreen(onClick: () -> Unit) {
         sheetContent = {
             BottomSheet()
         }) {
-        Sections(onClick, sheetState, scope)
+        Sections(onClick, sheetState)
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Sections(onClick: () -> Unit, sheetState: BottomSheetState, scope: CoroutineScope) {
+fun Sections(onClick: () -> Unit, sheetState: BottomSheetState) {
+    val scope = rememberCoroutineScope()
     Box(
         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {

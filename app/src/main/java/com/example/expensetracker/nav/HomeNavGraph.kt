@@ -17,14 +17,14 @@ fun HomeNavGraph(navController: NavHostController) {
         startDestination = BottomBarScreen.Home.route
     ) {
 
-        composable(route = BottomBarScreen.Home.route){
-            HomeContent(onClick = {navController.navigate(Graph.DETAILS)})
+        composable(route = BottomBarScreen.Home.route) {
+            HomeContent(onClick = { navController.navigate(Graph.DETAILS) })
         }
         composable(route = BottomBarScreen.Expenses.route) {
-           ExpensesScreen(onClick = {navController.navigate(Graph.DETAILS)})
+            ExpensesScreen(onClick = { navController.navigate(Graph.DETAILS) })
         }
         composable(route = BottomBarScreen.NewExpense.route) {
-
+            NewScreen(onClick = {navController.popBackStack()})
         }
         composable(route = BottomBarScreen.Report.route) {
             ReportScreen()
@@ -32,7 +32,7 @@ fun HomeNavGraph(navController: NavHostController) {
         composable(route = BottomBarScreen.Budget.route) {
             BudgetScreen()
         }
-        detailsNavGraph(navController  = navController)
+        detailsNavGraph(navController = navController)
 
     }
 }
@@ -43,7 +43,7 @@ fun NavGraphBuilder.detailsNavGraph(navController: NavHostController) {
         startDestination = DetailsScreen.Information.route
     ) {
         composable(route = DetailsScreen.Information.route) {
-            ExpenseDetails(navController =  navController)
+            ExpenseDetails(navController = navController)
         }
     }
 }

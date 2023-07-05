@@ -21,7 +21,7 @@ fun BottomNavGraph(navController: NavHostController) {
             ExpensesScreen(onClick = {})
         }
         composable(route = BottomBarScreen.NewExpense.route) {
-            NewScreen()
+            NewScreen(onClick = {})
         }
         composable(route = BottomBarScreen.Report.route) {
             ReportScreen()
