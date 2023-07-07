@@ -22,5 +22,6 @@ fun RootNavigationGraph(navController: NavHostController) {
 object Graph {
     const val ROOT = "root_graph"
     const val HOME = "home_graph"
-    const val DETAILS = "details_graph"
+    const val EXPENSE = "expense_graph"
+    const val BUDGET = "budget_graph"
 }

@@ -7,6 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.expensetracker.*
+import com.example.expensetracker.views.BudgetCreate
+import com.example.expensetracker.views.BudgetDetails
 
 
 @Composable
@@ -18,10 +20,10 @@ fun HomeNavGraph(navController: NavHostController) {
     ) {
 
         composable(route = BottomBarScreen.Home.route) {
-            HomeContent(onClick = { navController.navigate(Graph.DETAILS) })
+            HomeContent(onClick = { navController.navigate(Graph.EXPENSE) })
         }
         composable(route = BottomBarScreen.Expenses.route) {
-            ExpensesScreen(onClick = { navController.navigate(Graph.DETAILS) })
+            ExpensesScreen(onClick = { navController.navigate(Graph.EXPENSE) })
         }
         composable(route = BottomBarScreen.NewExpense.route) {
             NewScreen(onClick = {navController.popBackStack()})
@@ -30,25 +32,45 @@ fun HomeNavGraph(navController: NavHostController) {
             ReportScreen()
         }
         composable(route = BottomBarScreen.Budget.route) {
-            BudgetScreen()
+            BudgetScreen(navController)
         }
         detailsNavGraph(navController = navController)
+        budgetNavGraph(navController)
 
     }
 }
 
+
+
 fun NavGraphBuilder.detailsNavGraph(navController: NavHostController) {
     navigation(
-        route = Graph.DETAILS,
-        startDestination = DetailsScreen.Information.route
+        route = Graph.EXPENSE,
+        startDestination = ExpenseScreen.Details.route
     ) {
-        composable(route = DetailsScreen.Information.route) {
+        composable(route = ExpenseScreen.Details.route) {
             ExpenseDetails(navController = navController)
         }
     }
 }
+fun NavGraphBuilder.budgetNavGraph(navController: NavHostController) {
+    navigation(
+        route = Graph.BUDGET,
+        startDestination = BudgetScreen.Details.route
+    ) {
+        composable(route = BudgetScreen.Details.route) {
+            BudgetDetails(navController = navController)
+        }
+        composable(route = BudgetScreen.Create.route){
+            BudgetCreate(navController)
+        }
+    }
+}
 
-sealed class DetailsScreen(val route: String) {
-    object Information : DetailsScreen(route = "INFORMATION")
+sealed class ExpenseScreen(val route: String) {
+    object Details : ExpenseScreen(route = "DETAILS")
+}
+sealed class BudgetScreen(val route: String) {
+    object Details : BudgetScreen(route = "DETAILS")
+    object Create : BudgetScreen(route = "CREATE")
 }
 

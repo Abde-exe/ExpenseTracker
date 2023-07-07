@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.example.expensetracker.views.ValidateBtn
 
 private var header = Color(0xFFFD3C4A)
 private var textColor = Color(0xFFFCFCFC)
@@ -139,7 +140,7 @@ fun Form(onClick: () -> Unit) {
             CategorySpinner(category)
             TypeSpinner(type)
             ImagePicker(photoUri)
-            ValidateBtn(onClick)
+            ValidateBtn("Continue", onClick)
 
         }
     }
@@ -167,30 +168,6 @@ fun TitleField(title: MutableState<String>) {
 }
 
 
-@Composable
-fun ValidateBtn(onClick: () -> Unit) {
-    Button(
-        onClick = { onClick() },
-        modifier = Modifier
-            .width(343.dp)
-            .height(56.dp)
-            .background(
-                color = Color(0xFF7F3DFF),
-                shape = RoundedCornerShape(size = 16.dp)
-            )
-            .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
-
-    ) {
-        Text(
-            text = "Continue",
-            fontSize = 18.sp,
-            fontWeight = FontWeight(600),
-            color = Color(0xFFFCFCFC),
-            textAlign = TextAlign.Center
-        )
-
-    }
-}
 
 @Composable
 fun AmountField() {
@@ -207,7 +184,7 @@ fun AmountField() {
                 currencyDrawable = R.drawable.baseline_euro_24
                 isEuro = true
             }
-        }, colors = ButtonDefaults.buttonColors(header)) {
+        }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent)) {
             Icon(
                 painterResource(id = currencyDrawable),
                 contentDescription = "Euro Icon",
@@ -219,13 +196,11 @@ fun AmountField() {
             value = text,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             onValueChange = { newText -> text = newText },
-            modifier = Modifier
-                .background(header),
             textStyle = TextStyle(fontSize = 77.sp, color = Color.White),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 textColor = Color.White,
-                focusedBorderColor = header,
-                unfocusedBorderColor = header,
+                focusedBorderColor =  Color.Transparent,
+                unfocusedBorderColor = Color.Transparent,
             )
         )
     }

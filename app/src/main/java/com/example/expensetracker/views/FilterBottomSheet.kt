@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,28 +57,7 @@ fun BottomSheet() {
         FilterSection()
         SortingSection()
         CategorySection()
-        Button(
-            onClick = { /*TODO*/ },
-            modifier = Modifier
-                .width(343.dp)
-                .height(56.dp)
-                .background(
-                    color = Color(0xFF7F3DFF), shape = RoundedCornerShape(size = 16.dp)
-                )
-                .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp)
-                .align(Alignment.CenterHorizontally),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFF7F3DFF))
-
-        ) {
-            Text(
-                text = "Apply",
-                fontSize = 18.sp,
-                fontWeight = FontWeight(600),
-                color = Color(0xFFFCFCFC),
-                textAlign = TextAlign.Center
-            )
-
-        }
+        ValidateBtn("Apply",{})
     }
 }
 
