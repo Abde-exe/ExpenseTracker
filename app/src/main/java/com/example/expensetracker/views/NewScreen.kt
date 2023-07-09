@@ -37,12 +37,21 @@ private var textColor = Color(0xFFFCFCFC)
 
 @Composable
 fun NewScreen(onClick: () -> Unit) {
+    val amount: MutableState<Float> = remember {
+        mutableStateOf(0f)
+    }
+    val category: MutableState<String> = remember {
+        mutableStateOf("")
+    }
+    val isEuro: MutableState<Boolean> = remember {
+        mutableStateOf(true)
+    }
     Column(
         modifier = Modifier
             .fillMaxHeight()
             .background(header)
     ) {
-        Header(onClick)
+        Header(onClick, amount)
         Form(onClick)
         Spacer(
             modifier = Modifier
@@ -54,7 +63,7 @@ fun NewScreen(onClick: () -> Unit) {
 }
 
 @Composable
-fun Header(onClick: () -> Unit) {
+fun Header(onClick: () -> Unit, amount:MutableState<Float>) {
     Column {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -96,7 +105,7 @@ fun Header(onClick: () -> Unit) {
                     Alignment.Start
                 )
             )
-            AmountField()
+            AmountField { newAmount -> amount.value = newAmount.toFloat() }
         }
     }
 }
@@ -168,12 +177,11 @@ fun TitleField(title: MutableState<String>) {
 }
 
 
-
 @Composable
-fun AmountField() {
-    var text by remember { mutableStateOf("0") }
+fun AmountField(onAmountChange: (String) -> Unit) {
     var isEuro: Boolean by remember { mutableStateOf(true) }
     var currencyDrawable: Int by remember { mutableStateOf(R.drawable.baseline_euro_24) }
+    var text: String by remember { mutableStateOf("0") }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Button(contentPadding = PaddingValues(0.dp), onClick = {
@@ -195,11 +203,14 @@ fun AmountField() {
         OutlinedTextField(
             value = text,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            onValueChange = { newText -> text = newText },
+            onValueChange = { newText ->
+                text = newText
+                onAmountChange(text)
+            },
             textStyle = TextStyle(fontSize = 77.sp, color = Color.White),
             colors = TextFieldDefaults.outlinedTextFieldColors(
                 textColor = Color.White,
-                focusedBorderColor =  Color.Transparent,
+                focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
             )
         )

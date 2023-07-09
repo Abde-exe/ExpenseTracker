@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Text
@@ -17,15 +19,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.expensetracker.models.Budget
 import com.example.expensetracker.nav.BudgetScreen
 import com.example.expensetracker.nav.Graph
 import com.example.expensetracker.views.ValidateBtn
 
+var budgets: MutableList<Budget> = Constants.getBudgets()
 
 @Composable
 fun BudgetScreen(navController: NavHostController) {
     val bgColor = Color(0xFF7F3DFF)
-    var budgets: MutableList<String> = mutableListOf("")
 
     Column(
         modifier = Modifier
@@ -44,16 +47,22 @@ fun BudgetScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .background(Color.White, shape = RoundedCornerShape(24.dp, 24.dp, 0.dp, 0.dp))
         ) {
-            BudgetCard(navController)
-            BudgetCard(navController)
-
+            BudgetsList(navController)
             ValidateBtn("Create a budget") { navController.navigate(BudgetScreen.Create.route) }
+        }
+    }
+}
+@Composable
+fun BudgetsList(navController: NavHostController){
+    LazyColumn{
+        items(budgets){budget->
+            BudgetCard(navController = navController, budget)
         }
     }
 }
 
 @Composable
-fun BudgetCard(navController: NavHostController) {
+fun BudgetCard(navController: NavHostController, budget:Budget) {
     Column(
         modifier = Modifier
             .background(Color(0xFFFCFCFC), shape = RoundedCornerShape(16.dp))
@@ -76,14 +85,14 @@ fun BudgetCard(navController: NavHostController) {
                 .padding(start = 8.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
         ) {
             Text(
-                text = "Shopping", fontSize = 14.sp,
+                text = budget.category, fontSize = 14.sp,
                 fontWeight = FontWeight(500),
                 color = Color(0xFF212325)
             )
         }
 
         Text(
-            text = "Remaining $0",
+            text = "Remaining : ${budget.amount - budget.spent}€",
             fontSize = 24.sp,
             fontWeight = FontWeight(600),
             color = Color(0xFF0D0E0F)
@@ -97,7 +106,7 @@ fun BudgetCard(navController: NavHostController) {
             Color.Blue
         )
         Text(
-            text = "$1200 of $1000",
+            text = "${budget.spent} of ${budget.amount}€",
             fontSize = 16.sp,
             fontWeight = FontWeight(500),
             color = Color(0xFF91919F)

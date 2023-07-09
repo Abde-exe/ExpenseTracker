@@ -24,6 +24,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.expensetracker.models.Budget
+
+
 
 @Composable
 fun BudgetDetails(navController: NavHostController) {
