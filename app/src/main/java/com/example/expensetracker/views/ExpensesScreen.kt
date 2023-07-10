@@ -2,6 +2,7 @@ package com.example.expensetracker
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -19,6 +20,8 @@ import androidx.compose.ui.zIndex
 import com.example.expensetracker.views.BottomSheet
 import kotlinx.coroutines.launch
 
+
+var expenses = Constants.getExpenses()
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ExpensesScreen(onClick: () -> Unit) {
@@ -100,8 +103,8 @@ fun Sections(onClick: () -> Unit, sheetState: BottomSheetState) {
 @Composable
 fun ExpensesList(count: Int, onClick: () -> Unit) {
     LazyColumn {
-        items(count) {
-            ExpenseItem(onClick)
+        items(expenses){expense->
+            ExpenseItem(onClick, expense)
         }
     }
 }
@@ -109,5 +112,5 @@ fun ExpensesList(count: Int, onClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun ListPreview() {
-    ExpensesScreen({ print("z") })
+    ExpensesScreen {}
 }

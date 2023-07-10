@@ -26,7 +26,7 @@ fun HomeNavGraph(navController: NavHostController) {
             ExpensesScreen(onClick = { navController.navigate(Graph.EXPENSE) })
         }
         composable(route = BottomBarScreen.NewExpense.route) {
-            NewScreen(onClick = {navController.popBackStack()})
+            NewScreen(navController)
         }
         composable(route = BottomBarScreen.Report.route) {
             ReportScreen()

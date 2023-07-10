@@ -28,31 +28,31 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.example.expensetracker.models.Budget
+import com.example.expensetracker.models.Expense
 import com.example.expensetracker.views.ValidateBtn
+import java.util.*
 
 private var header = Color(0xFFFD3C4A)
 private var textColor = Color(0xFFFCFCFC)
 
 @Composable
-fun NewScreen(onClick: () -> Unit) {
+fun NewScreen(navController: NavHostController) {
     val amount: MutableState<String> = remember {
         mutableStateOf("0")
     }
-    val category: MutableState<String> = remember {
-        mutableStateOf("")
-    }
-    val isEuro: MutableState<Boolean> = remember {
-        mutableStateOf(true)
-    }
+
     Column(
         modifier = Modifier
             .fillMaxHeight()
             .background(header)
     ) {
-        Header(onClick, amount)
-        Form(onClick)
+        Header({navController.popBackStack()}, amount)
+        Form(navController, amount)
         Spacer(
             modifier = Modifier
                 .height(50.dp)
@@ -111,7 +111,7 @@ fun Header(onClick: () -> Unit, amount:MutableState<String>) {
 }
 
 @Composable
-fun Form(onClick: () -> Unit) {
+fun Form(navController:NavHostController, amount:MutableState<String>) {
     val category: MutableState<String> = remember {
         mutableStateOf("")
     }
@@ -123,6 +123,9 @@ fun Form(onClick: () -> Unit) {
     }
     val photoUri: MutableState<Uri?> = remember { mutableStateOf(null) }
 
+    val isEuro: MutableState<Boolean> = remember {
+        mutableStateOf(true)
+    }
 
     Column(
         modifier = Modifier
@@ -149,7 +152,22 @@ fun Form(onClick: () -> Unit) {
             CategorySpinner(category)
             TypeSpinner(type)
             ImagePicker(photoUri)
-            ValidateBtn("Continue", onClick)
+            ValidateBtn("Continue") {
+                val amountF = amount.value.toFloat()
+                val newExpense = Expense(
+                    title= title.value,
+                    description = "",
+                    amount = if (amount.value != "") amountF else 0f,
+                    currency = if (isEuro.value) Constants.Currencies.EUR.currencyName else Constants.Currencies.TRY.currencyName,
+                    changedAmount = if (isEuro.value) amountF * 28.34f else  amountF * 0.035f,
+                    category = category.value,
+                    paymentType = type.value,
+                    date = Date(),
+                    images = null
+                )
+                Constants.addExpense(newExpense)
+                navController.popBackStack()
+            }
 
         }
     }
@@ -395,5 +413,5 @@ fun ImagePicker(photoUri: MutableState<Uri?>) {
 @Preview(showBackground = true)
 @Composable
 fun NewPreview() {
-    NewScreen({})
+    NewScreen(rememberNavController())
 }

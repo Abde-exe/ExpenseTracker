@@ -15,6 +15,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.expensetracker.models.Expense
+import java.text.SimpleDateFormat
+import java.util.*
 
 private val color_item_bg = Color(0xfff1f1fa)
 
@@ -67,7 +70,8 @@ fun CurrencyChange(){
                 )
         }
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(0.dp, 0.dp, 0.dp, 16.dp),
             horizontalArrangement = Arrangement.Center
         ){
@@ -193,7 +197,7 @@ fun TodayExpenses(onClick: () -> Unit){
 
 //subcomponents
 @Composable
-fun ExpenseItem(onClick: () -> Unit) {
+fun ExpenseItem(onClick: () -> Unit, expense: Expense) {
     Row(
         modifier = Modifier
             .padding(24.dp, 8.dp)
@@ -222,16 +226,16 @@ fun ExpenseItem(onClick: () -> Unit) {
                     modifier = Modifier
                         .padding(8.dp, 0.dp)
                         .fillMaxHeight(),
-                    verticalArrangement = Arrangement.SpaceBetween
+                    verticalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Text(
-                        text = "Shopping",
+                        text = expense.category,
                         fontSize = 16.sp,
                         fontWeight = FontWeight(500),
                         color = Color(0xFF292B2D)
                     )
                     Text(
-                        text = "Buy some grocery",
+                        text = expense.title,
                         fontSize = 13.sp,
                         fontWeight = FontWeight(500),
                         color = Color(0xFF91919F)
@@ -239,19 +243,25 @@ fun ExpenseItem(onClick: () -> Unit) {
                 }
                 Column(
                     modifier = Modifier.fillMaxHeight(),
-                    verticalArrangement = Arrangement.SpaceBetween
+                    verticalArrangement = Arrangement.SpaceEvenly
                 ) {
+                    val currencySymbol = Constants.Currencies.valueOf(expense.currency).symbol
                     Text(
-                        text = "- $120",
+                        text = "${expense.amount} $currencySymbol",
                         fontSize = 16.sp,
                         fontWeight = FontWeight(600),
-                        color = Color(0xFFFD3C4A)
+                        color = Color(0xFFFD3C4A),
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.fillMaxWidth()
                     )
+                    val formattedDate = SimpleDateFormat("HH:mm", Locale.getDefault()).format(expense.date)
                     Text(
-                        text = "10:00 AM",
+                        text = formattedDate,
                         fontSize = 13.sp,
                         fontWeight = FontWeight(500),
-                        color = Color(0xFF91919F)
+                        color = Color(0xFF91919F),
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }
