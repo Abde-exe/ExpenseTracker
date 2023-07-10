@@ -27,7 +27,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.expensetracker.AmountField
 import com.example.expensetracker.CategorySpinner
 import com.example.expensetracker.Constants
-import com.example.expensetracker.budgets
 import com.example.expensetracker.models.Budget
 
 private var textColor = Color(0xFFFCFCFC)
@@ -36,8 +35,8 @@ private var textColor = Color(0xFFFCFCFC)
 @Composable
 fun BudgetCreate(navController: NavHostController) {
     val bgColor = Color(0xFF7F3DFF)
-    val amount: MutableState<Float> = remember {
-        mutableStateOf(0f)
+    val amount: MutableState<String> = remember {
+        mutableStateOf("0")
     }
     val category: MutableState<String> = remember {
         mutableStateOf("")
@@ -90,7 +89,7 @@ fun BudgetCreate(navController: NavHostController) {
                     color = Color(0xFFFCFCFC),
                 )
             )
-            AmountField(onAmountChange = { newAmount -> amount.value = newAmount.toFloat() })
+            AmountField(onAmountChange = { newAmount -> amount.value = newAmount })
         }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -108,8 +107,8 @@ fun BudgetCreate(navController: NavHostController) {
             ) {
                 CategorySpinner(category)
                 ValidateBtn("Continue") {
-                    var newBudget: Budget = Budget(
-                        amount = amount.value,
+                    val newBudget = Budget(
+                        amount = if (amount.value != "") amount.value.toFloat() else 0f,
                         currency = if (isEuro.value) Constants.Currencies.EUR.currencyName else Constants.Currencies.TRY.currencyName,
                         spent = 0f,
                         category = category.value

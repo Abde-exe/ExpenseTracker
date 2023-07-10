@@ -101,7 +101,7 @@ fun BudgetCard(navController: NavHostController, budget:Budget) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(12.dp),
-            color = Color.Yellow,
+            //color = Color.Yellow,
             backgroundColor =
             Color.Blue
         )

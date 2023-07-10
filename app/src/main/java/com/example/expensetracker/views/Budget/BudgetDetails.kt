@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.example.expensetracker.models.Budget
 
 
 
@@ -116,7 +115,7 @@ fun Details() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(12.dp),
-            color = Color.Yellow,
+           // color = Color.Yellow,
             backgroundColor =
             Color.Blue
         )

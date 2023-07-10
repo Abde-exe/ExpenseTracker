@@ -37,8 +37,8 @@ private var textColor = Color(0xFFFCFCFC)
 
 @Composable
 fun NewScreen(onClick: () -> Unit) {
-    val amount: MutableState<Float> = remember {
-        mutableStateOf(0f)
+    val amount: MutableState<String> = remember {
+        mutableStateOf("0")
     }
     val category: MutableState<String> = remember {
         mutableStateOf("")
@@ -63,7 +63,7 @@ fun NewScreen(onClick: () -> Unit) {
 }
 
 @Composable
-fun Header(onClick: () -> Unit, amount:MutableState<Float>) {
+fun Header(onClick: () -> Unit, amount:MutableState<String>) {
     Column {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -105,7 +105,7 @@ fun Header(onClick: () -> Unit, amount:MutableState<Float>) {
                     Alignment.Start
                 )
             )
-            AmountField { newAmount -> amount.value = newAmount.toFloat() }
+            AmountField { newAmount -> amount.value = newAmount }
         }
     }
 }
