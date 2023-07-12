@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.expensetracker.models.Expense
 import com.example.expensetracker.views.ValidateBtn
 
 private var header = Color(0xFFFD3C4A)

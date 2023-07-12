@@ -22,13 +22,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.navigation.NavHostController
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-
+import com.example.expensetracker.models.Budget
+import com.example.expensetracker.Constants
 
 
 @Composable
-fun BudgetDetails(navController: NavHostController) {
+fun BudgetDetails(navController: NavController, budget: Budget) {
     Column(modifier = Modifier.fillMaxHeight()) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -55,8 +56,14 @@ fun BudgetDetails(navController: NavHostController) {
 
         }
 
-        Column(modifier = Modifier.fillMaxHeight().padding(32.dp), verticalArrangement = Arrangement.SpaceBetween, horizontalAlignment = Alignment.CenterHorizontally) {
-            Details()
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(32.dp),
+            verticalArrangement = Arrangement.SpaceEvenly,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Details(budget.category, budget.amount, budget.currency)
             ValidateBtn("Edit") { navController.popBackStack() }
         }
 
@@ -64,7 +71,9 @@ fun BudgetDetails(navController: NavHostController) {
 }
 
 @Composable
-fun Details() {
+fun Details(category: String, amount: Float, currency: String) {
+    val symbol =
+        if (currency == "EUR") Constants.Currencies.EUR.symbol else Constants.Currencies.TRY.symbol
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
@@ -86,7 +95,7 @@ fun Details() {
                 .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp)
         ) {
             Text(
-                text = "Shopping",
+                text = category,
                 style = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight(600),
@@ -104,7 +113,7 @@ fun Details() {
             )
         )
         Text(
-            text = "$0",
+            text = "$amount $symbol",
             style = TextStyle(
                 fontSize = 64.sp,
                 fontWeight = FontWeight(600),
@@ -115,7 +124,7 @@ fun Details() {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(12.dp),
-           // color = Color.Yellow,
+            // color = Color.Yellow,
             backgroundColor =
             Color.Blue
         )
@@ -125,5 +134,5 @@ fun Details() {
 @Preview(showBackground = true)
 @Composable
 fun BudgetDetailsPreview() {
-    BudgetDetails(rememberNavController())
+    BudgetDetails(rememberNavController(), com.example.expensetracker.Constants.getBudgets()[0])
 }

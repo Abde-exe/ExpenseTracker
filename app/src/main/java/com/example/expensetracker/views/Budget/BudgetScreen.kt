@@ -41,6 +41,7 @@ fun BudgetScreen(navController: NavHostController) {
                 .fillMaxWidth()
         )
         Column(
+            verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxHeight()
@@ -52,24 +53,25 @@ fun BudgetScreen(navController: NavHostController) {
         }
     }
 }
+
 @Composable
-fun BudgetsList(navController: NavHostController){
-    LazyColumn{
-        items(budgets){budget->
+fun BudgetsList(navController: NavHostController) {
+    LazyColumn {
+        items(budgets) { budget ->
             BudgetCard(navController = navController, budget)
         }
     }
 }
 
 @Composable
-fun BudgetCard(navController: NavHostController, budget:Budget) {
+fun BudgetCard(navController: NavHostController, budget: Budget) {
     Column(
         modifier = Modifier
             .background(Color(0xFFFCFCFC), shape = RoundedCornerShape(16.dp))
             .width(650.dp)
             .height(180.dp)
             .padding(16.dp)
-            .clickable { navController.navigate(Graph.BUDGET) }
+            .clickable { navController.navigate(route = "DETAILS/$budget") }
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),

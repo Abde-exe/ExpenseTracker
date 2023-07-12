@@ -22,6 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.expensetracker.AmountField
@@ -33,7 +34,7 @@ private var textColor = Color(0xFFFCFCFC)
 
 
 @Composable
-fun BudgetCreate(navController: NavHostController) {
+fun BudgetCreate(navController: NavController) {
     val bgColor = Color(0xFF7F3DFF)
     val amount: MutableState<String> = remember {
         mutableStateOf("0")

@@ -1,14 +1,16 @@
 package com.example.expensetracker.nav
 
+import android.util.Log
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
+import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navigation
 import com.example.expensetracker.*
+import com.example.expensetracker.models.Budget
+import com.example.expensetracker.models.BudgetArgType
 import com.example.expensetracker.views.BudgetCreate
 import com.example.expensetracker.views.BudgetDetails
+import com.google.gson.Gson
 
 
 @Composable
@@ -41,7 +43,6 @@ fun HomeNavGraph(navController: NavHostController) {
 }
 
 
-
 fun NavGraphBuilder.detailsNavGraph(navController: NavHostController) {
     navigation(
         route = Graph.EXPENSE,
@@ -52,15 +53,20 @@ fun NavGraphBuilder.detailsNavGraph(navController: NavHostController) {
         }
     }
 }
+
 fun NavGraphBuilder.budgetNavGraph(navController: NavHostController) {
     navigation(
         route = Graph.BUDGET,
         startDestination = BudgetScreen.Details.route
     ) {
-        composable(route = BudgetScreen.Details.route) {
-            BudgetDetails(navController = navController)
+        composable(route = BudgetScreen.Details.route, arguments = listOf(navArgument("budget") {
+            type = BudgetArgType()
+        })) {
+            val budget : Budget? = it.arguments?.getString("budget")?.let { Gson().fromJson(it, Budget::class.java) }
+            //Log.d("Args",it.arguments?.getString("budget").toString())
+            BudgetDetails(navController, budget!!)
         }
-        composable(route = BudgetScreen.Create.route){
+        composable(route = BudgetScreen.Create.route) {
             BudgetCreate(navController)
         }
     }
@@ -69,8 +75,9 @@ fun NavGraphBuilder.budgetNavGraph(navController: NavHostController) {
 sealed class ExpenseScreen(val route: String) {
     object Details : ExpenseScreen(route = "DETAILS")
 }
+
 sealed class BudgetScreen(val route: String) {
-    object Details : BudgetScreen(route = "DETAILS")
+    object Details : BudgetScreen(route = "DETAILS/{budget}")
     object Create : BudgetScreen(route = "CREATE")
 }
 
