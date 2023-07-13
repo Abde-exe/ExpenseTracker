@@ -24,16 +24,22 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.example.expensetracker.models.Expense
 import com.example.expensetracker.views.ValidateBtn
+import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.*
 
 private var header = Color(0xFFFD3C4A)
 private var textColor = Color(0xFFFCFCFC)
 private var subTextColor = Color(0xFF91919F)
 
 @Composable
-fun ExpenseDetails(navController: NavHostController) {
-    Column(modifier = Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Header(navController)
-        Description()
+fun ExpenseDetails(navController: NavHostController, expense: Expense) {
+    Column(
+        modifier = Modifier.fillMaxHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Header({ navController.popBackStack() }, expense)
+        Description(expense.images?.get(0))
         Spacer(
             modifier = Modifier
                 .height(50.dp)
@@ -44,7 +50,7 @@ fun ExpenseDetails(navController: NavHostController) {
 }
 
 @Composable
-fun Header(navController: NavHostController) {
+fun Header(onClick: () -> Unit, expense: Expense) {
     Box() {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -58,7 +64,7 @@ fun Header(navController: NavHostController) {
                 contentDescription = "arrowback",
                 tint = textColor,
                 modifier = Modifier.clickable {
-                    navController.popBackStack()
+                    onClick()
                 }
             )
             Text(
@@ -82,13 +88,15 @@ fun Header(navController: NavHostController) {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "120$",
+                text = expense.amount.toString(),
                 color = textColor,
                 fontSize = 48.sp,
                 fontWeight = FontWeight(500)
             )
-            Text(text = "buy some groceries", color = textColor, fontSize = 16.sp)
-            Text(text = "Saturday 5 june 2023 16:20", color = textColor, fontSize = 13.sp)
+            Text(text = expense.title, color = textColor, fontSize = 16.sp)
+            val formattedDate = SimpleDateFormat("dd/MM, HH:mm", Locale.getDefault()).format(expense.date)
+
+            Text(text = formattedDate, color = textColor, fontSize = 13.sp)
 
         }
         Row(
@@ -111,7 +119,7 @@ fun Header(navController: NavHostController) {
                     color = subTextColor,
                 )
                 Text(
-                    text = "Cash", fontSize = 16.sp,
+                    text = expense.paymentType, fontSize = 16.sp,
                     fontWeight = FontWeight(600)
                 )
             }
@@ -122,18 +130,18 @@ fun Header(navController: NavHostController) {
                     color = subTextColor,
                 )
                 Text(
-                    text = "Shopping", fontSize = 16.sp,
+                    text = expense.category, fontSize = 16.sp,
                     fontWeight = FontWeight(600)
                 )
             }
             Column {
                 Text(
-                    text = "Type", fontSize = 14.sp,
+                    text = "", fontSize = 14.sp,
                     fontWeight = FontWeight(500),
                     color = subTextColor,
                 )
                 Text(
-                    text = "Cash", fontSize = 16.sp,
+                    text = "", fontSize = 16.sp,
                     fontWeight = FontWeight(600)
                 )
             }
@@ -142,7 +150,7 @@ fun Header(navController: NavHostController) {
 }
 
 @Composable
-fun Description() {
+fun Description(expenseImg : URL?) {
     Column(
         verticalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier
@@ -168,19 +176,21 @@ fun Description() {
             fontWeight = FontWeight(600),
             color = subTextColor
         )
+        //val painter = expenseImg ?: painterResource(id = R.drawable.rectangle_207)
         val painter = painterResource(id = R.drawable.rectangle_207)
         Image(
             painter = painter,
-            contentDescription = "imgasset",
+            contentDescription = "imgAsset",
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
         )
+
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun DetailsPreview() {
-    ExpenseDetails(rememberNavController())
+    ExpenseDetails(rememberNavController(), Constants.getExpenses()[0])
 }

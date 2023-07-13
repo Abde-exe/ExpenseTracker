@@ -15,6 +15,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.expensetracker.models.Expense
 import java.text.SimpleDateFormat
 import java.util.*
@@ -25,7 +26,7 @@ private val color_item_bg = Color(0xfff1f1fa)
 
 
 @Composable
-fun HomeContent(onClick : ()->Unit) {
+fun HomeContent(navController: NavController) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -33,7 +34,7 @@ fun HomeContent(onClick : ()->Unit) {
         Column {
             CurrencyChange()
             Balance(1000.00f, 10.00f)
-            TodayExpenses(onClick)
+            TodayExpenses(navController)
         }
     }
 }
@@ -183,7 +184,7 @@ fun Balance(amount: Float, spent: Float) {
 }
 
 @Composable
-fun TodayExpenses(onClick: () -> Unit){
+fun TodayExpenses(navController : NavController){
     Text(
         "Today's expenses",
         fontWeight = FontWeight(600),
@@ -191,7 +192,7 @@ fun TodayExpenses(onClick: () -> Unit){
         color = Color(0xFF0D0E0F),
         modifier = Modifier.padding(8.dp)
     )
-    ExpensesList(count = 3, onClick = onClick)
+    ExpensesList(navController)
 }
 
 

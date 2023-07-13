@@ -17,6 +17,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.expensetracker.views.BottomSheet
 import kotlinx.coroutines.launch
 
@@ -24,7 +26,7 @@ import kotlinx.coroutines.launch
 var expenses = Constants.getExpenses()
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ExpensesScreen(onClick: () -> Unit) {
+fun ExpensesScreen(navController: NavController) {
     val sheetState = rememberBottomSheetState(
         initialValue = BottomSheetValue.Collapsed
     )
@@ -38,13 +40,13 @@ fun ExpensesScreen(onClick: () -> Unit) {
         sheetContent = {
             BottomSheet()
         }) {
-        Sections(onClick, sheetState)
+        Sections(navController, sheetState)
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Sections(onClick: () -> Unit, sheetState: BottomSheetState) {
+fun Sections(navController: NavController, sheetState: BottomSheetState) {
     val scope = rememberCoroutineScope()
     Box(
         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
@@ -84,7 +86,7 @@ fun Sections(onClick: () -> Unit, sheetState: BottomSheetState) {
                 color = Color(0xFF0D0E0F),
                 modifier = Modifier.padding(16.dp)
             )
-            ExpensesList(3, onClick)
+            ExpensesList(navController)
             Text(
                 "Yesterday",
                 fontWeight = FontWeight(600),
@@ -92,7 +94,7 @@ fun Sections(onClick: () -> Unit, sheetState: BottomSheetState) {
                 color = Color(0xFF0D0E0F),
                 modifier = Modifier.padding(16.dp)
             )
-            ExpensesList(3, onClick)
+            ExpensesList(navController)
 
 
         }
@@ -101,10 +103,10 @@ fun Sections(onClick: () -> Unit, sheetState: BottomSheetState) {
 }
 
 @Composable
-fun ExpensesList(count: Int, onClick: () -> Unit) {
+fun ExpensesList(navController: NavController) {
     LazyColumn {
         items(expenses){expense->
-            ExpenseItem(onClick, expense)
+            ExpenseItem({navController.navigate("EXPENSEDETAILS/$expense")}, expense)
         }
     }
 }
@@ -112,5 +114,5 @@ fun ExpensesList(count: Int, onClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun ListPreview() {
-    ExpensesScreen {}
+    ExpensesScreen(rememberNavController())
 }
