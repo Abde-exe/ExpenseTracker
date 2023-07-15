@@ -28,9 +28,9 @@ object Constants {
 
     fun getBudgets(): MutableList<Budget> {
 
-        val b1 = Budget(100f, Currencies.EUR.currencyName, spent = 0f, Categories.SHOPPING.name)
-        val b2 = Budget(200f, Currencies.TRY.currencyName, spent = 18f, Categories.TRANSP.name)
-        val b3 = Budget(300f, Currencies.EUR.currencyName, spent = 50f, Categories.NS.name)
+        val b1 = Budget(0, 0f, Currencies.EUR.currencyName, spent = 0f, Categories.NS.name)
+        val b2 = Budget(1, 200f, Currencies.TRY.currencyName, spent = 18f, Categories.TRANSP.name)
+        val b3 = Budget(2, 300f, Currencies.EUR.currencyName, spent = 50f, Categories.SHOPPING.name)
 
         budgetslist.add(b1)
         budgetslist.add(b2)
@@ -50,8 +50,8 @@ object Constants {
             amount = 1000f,
             currency = "EUR",
             changedAmount = 1000f * 28f,
-            category = Constants.Categories.TRANSP.categoryName,
-            paymentType =  Constants.PaymentType.CARD.typeName,
+            category = Categories.TRANSP.categoryName,
+            paymentType =  PaymentType.CARD.typeName,
             date = Date(),
             images = null
         )
@@ -61,8 +61,8 @@ object Constants {
             amount = 10000f,
             currency = "TRY",
             changedAmount = 10000f * 0.035f,
-            category = Constants.Categories.SHOPPING.categoryName,
-            paymentType =  Constants.PaymentType.CASH.typeName,
+            category = Categories.SHOPPING.categoryName,
+            paymentType =  PaymentType.CASH.typeName,
             date = Date(),
             images = null
         )

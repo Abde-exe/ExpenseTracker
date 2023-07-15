@@ -10,26 +10,39 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.expensetracker.database.AppDatabaseSingleton
 import com.example.expensetracker.models.Budget
+import com.example.expensetracker.models.toBudgets
 import com.example.expensetracker.nav.BudgetScreen
-import com.example.expensetracker.nav.Graph
 import com.example.expensetracker.views.ValidateBtn
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
-var budgets: MutableList<Budget> = Constants.getBudgets()
+
+private var budgets: List<Budget>? = null
 
 @Composable
 fun BudgetScreen(navController: NavHostController) {
     val bgColor = Color(0xFF7F3DFF)
-
+    val database = AppDatabaseSingleton.getInstance(LocalContext.current)
+    val budgetDAO = database.budgetDao()
+    LaunchedEffect(Unit) {
+        budgets = withContext(Dispatchers.IO)
+        {
+            budgetDAO.getAllBudgets().toBudgets()
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -48,7 +61,16 @@ fun BudgetScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .background(Color.White, shape = RoundedCornerShape(24.dp, 24.dp, 0.dp, 0.dp))
         ) {
-            BudgetsList(navController)
+            if (budgets == null) {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                )
+            }
+            else{
+                BudgetsList(navController)
+            }
             ValidateBtn("Create a budget") { navController.navigate(BudgetScreen.Create.route) }
         }
     }
@@ -57,7 +79,7 @@ fun BudgetScreen(navController: NavHostController) {
 @Composable
 fun BudgetsList(navController: NavHostController) {
     LazyColumn {
-        items(budgets) { budget ->
+        items(budgets!!) { budget ->
             BudgetCard(navController = navController, budget)
         }
     }
@@ -109,6 +131,12 @@ fun BudgetCard(navController: NavHostController, budget: Budget) {
         )
         Text(
             text = "${budget.spent} of ${budget.amount}€",
+            fontSize = 16.sp,
+            fontWeight = FontWeight(500),
+            color = Color(0xFF91919F)
+        )
+        Text(
+            text = "${budget.id}",
             fontSize = 16.sp,
             fontWeight = FontWeight(500),
             color = Color(0xFF91919F)

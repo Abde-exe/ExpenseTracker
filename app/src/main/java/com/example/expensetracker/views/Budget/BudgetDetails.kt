@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -26,10 +27,18 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.expensetracker.models.Budget
 import com.example.expensetracker.Constants
+import com.example.expensetracker.database.AppDatabaseSingleton
+import com.example.expensetracker.nav.BudgetScreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 @Composable
 fun BudgetDetails(navController: NavController, budget: Budget) {
+    val database = AppDatabaseSingleton.getInstance(LocalContext.current)
+
     Column(modifier = Modifier.fillMaxHeight()) {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -52,6 +61,15 @@ fun BudgetDetails(navController: NavController, budget: Budget) {
             Icon(
                 imageVector = Icons.Default.Delete,
                 contentDescription = "delete",
+                modifier = Modifier.clickable {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val budgetToDelete = database.budgetDao().getById(budget.id)
+                        database.budgetDao().delete(budgetToDelete)
+                        withContext(Dispatchers.Main){
+                            navController.popBackStack()
+                        }
+                    }
+                }
             )
 
         }
@@ -64,7 +82,7 @@ fun BudgetDetails(navController: NavController, budget: Budget) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Details(budget.category, budget.amount, budget.currency)
-            ValidateBtn("Edit") { navController.popBackStack() }
+            ValidateBtn("Edit") { navController.navigate(BudgetScreen.Edit.passBudget(budget)) }
         }
 
     }
@@ -98,7 +116,7 @@ fun Details(category: String, amount: Float, currency: String) {
                 text = category,
                 style = TextStyle(
                     fontSize = 18.sp,
-                    fontWeight = FontWeight(600),
+//                    fontWeight = FontWeight(600),
                     color = Color(0xFF0D0E0F),
                     textAlign = TextAlign.Center,
                 )
@@ -134,5 +152,5 @@ fun Details(category: String, amount: Float, currency: String) {
 @Preview(showBackground = true)
 @Composable
 fun BudgetDetailsPreview() {
-    BudgetDetails(rememberNavController(), com.example.expensetracker.Constants.getBudgets()[0])
+    BudgetDetails(rememberNavController(), Constants.getBudgets()[0])
 }

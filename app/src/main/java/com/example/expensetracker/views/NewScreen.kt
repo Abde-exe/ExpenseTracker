@@ -32,7 +32,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.example.expensetracker.models.Budget
 import com.example.expensetracker.models.Expense
 import com.example.expensetracker.views.ValidateBtn
 import java.util.*
@@ -51,7 +50,7 @@ fun NewScreen(navController: NavHostController) {
             .fillMaxHeight()
             .background(header)
     ) {
-        Header({navController.popBackStack()}, amount)
+        Header({ navController.popBackStack() }, amount)
         Form(navController, amount)
         Spacer(
             modifier = Modifier
@@ -63,7 +62,7 @@ fun NewScreen(navController: NavHostController) {
 }
 
 @Composable
-fun Header(onClick: () -> Unit, amount:MutableState<String>) {
+fun Header(onClick: () -> Unit, amount: MutableState<String>) {
     Column {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -105,15 +104,15 @@ fun Header(onClick: () -> Unit, amount:MutableState<String>) {
                     Alignment.Start
                 )
             )
-            AmountField { newAmount -> amount.value = newAmount }
+            AmountField({ newAmount -> amount.value = newAmount }, amount.value)
         }
     }
 }
 
 @Composable
-fun Form(navController:NavHostController, amount:MutableState<String>) {
+fun Form(navController: NavHostController, amount: MutableState<String>) {
     val category: MutableState<String> = remember {
-        mutableStateOf("")
+        mutableStateOf(Constants.Categories.SHOPPING.categoryName)
     }
     val title: MutableState<String> = remember {
         mutableStateOf("")
@@ -149,17 +148,17 @@ fun Form(navController:NavHostController, amount:MutableState<String>) {
         ) {
 
             TitleField(title)
-            CategorySpinner(category)
+            CategorySpinner(category.value) { newCategory -> category.value = newCategory }
             TypeSpinner(type)
             ImagePicker(photoUri)
             ValidateBtn("Continue") {
                 val amountF = amount.value.toFloat()
                 val newExpense = Expense(
-                    title= title.value,
+                    title = title.value,
                     description = "",
                     amount = if (amount.value != "") amountF else 0f,
                     currency = if (isEuro.value) Constants.Currencies.EUR.currencyName else Constants.Currencies.TRY.currencyName,
-                    changedAmount = if (isEuro.value) amountF * 28.34f else  amountF * 0.035f,
+                    changedAmount = if (isEuro.value) amountF * 28.34f else amountF * 0.035f,
                     category = category.value,
                     paymentType = type.value,
                     date = Date(),
@@ -196,10 +195,10 @@ fun TitleField(title: MutableState<String>) {
 
 
 @Composable
-fun AmountField(onAmountChange: (String) -> Unit) {
+fun AmountField(onAmountChange: (String) -> Unit, initialAmount: String) {
     var isEuro: Boolean by remember { mutableStateOf(true) }
     var currencyDrawable: Int by remember { mutableStateOf(R.drawable.baseline_euro_24) }
-    var text: String by remember { mutableStateOf("0") }
+    var text: String by remember { mutableStateOf(initialAmount) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
         Button(contentPadding = PaddingValues(0.dp), onClick = {
@@ -246,8 +245,8 @@ enum class CategoryItems(val title: String) {
 }
 
 @Composable
-fun CategorySpinner(category: MutableState<String>) {
-    val selectedOption = remember { mutableStateOf(CategoryItems.ITEM_1) }
+fun CategorySpinner(selectedCategory: String, onCategorySelected:(String)->Unit) {
+    val selectedOption = remember { mutableStateOf(selectedCategory) }
     val options = remember {
         mutableStateListOf(
             CategoryItems.ITEM_1,
@@ -277,7 +276,7 @@ fun CategorySpinner(category: MutableState<String>) {
     ) {
 
         Text(
-            text = selectedOption.value.title,
+            text = selectedOption.value,
             textAlign = TextAlign.Start,
             modifier = Modifier.fillMaxWidth(0.9f)
         )
@@ -289,9 +288,9 @@ fun CategorySpinner(category: MutableState<String>) {
 
             options.forEach { option ->
                 DropdownMenuItem(onClick = {
-                    selectedOption.value = option
+                    selectedOption.value = option.title
                     expandedState.value = false
-                    category.value = option.title
+                    onCategorySelected(option.title)
                 }) {
                     Text(text = option.title)
                 }

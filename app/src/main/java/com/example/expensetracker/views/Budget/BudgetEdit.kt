@@ -1,5 +1,6 @@
-package com.example.expensetracker.views.Budget
+package com.example.expensetracker.views
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,8 +28,6 @@ import com.example.expensetracker.CategorySpinner
 import com.example.expensetracker.Constants
 import com.example.expensetracker.database.AppDatabaseSingleton
 import com.example.expensetracker.models.Budget
-import com.example.expensetracker.models.toBudgetEntity
-import com.example.expensetracker.views.ValidateBtn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -38,18 +37,19 @@ private var textColor = Color(0xFFFCFCFC)
 
 
 @Composable
-fun BudgetCreate(navController: NavController) {
+fun BudgetEdit(navController: NavController, budget: Budget) {
     val database = AppDatabaseSingleton.getInstance(LocalContext.current)
+    Log.d("test", budget.amount.toString())
 
     val bgColor = Color(0xFF7F3DFF)
     val amount: MutableState<String> = remember {
-        mutableStateOf("0")
+        mutableStateOf(budget.amount.toString())
     }
     val category: MutableState<String> = remember {
-        mutableStateOf( Constants.Categories.SHOPPING.categoryName)
+        mutableStateOf(budget.category)
     }
     val isEuro: MutableState<Boolean> = remember {
-        mutableStateOf(true)
+        mutableStateOf(budget.currency == if (budget.currency == Constants.Currencies.EUR.currencyName) Constants.Currencies.EUR.currencyName else Constants.Currencies.TRY.currencyName)
     }
 
 
@@ -67,14 +67,14 @@ fun BudgetCreate(navController: NavController) {
         ) {
             Icon(
                 imageVector = Icons.Default.ArrowBack,
-                contentDescription = "arrowBack",
+                contentDescription = "arrowback",
                 tint = textColor,
                 modifier = Modifier.clickable {
                     navController.popBackStack()
                 }
             )
             Text(
-                text = "Create Budget", fontSize = 18.sp,
+                text = "Edit Budget", fontSize = 18.sp,
                 fontWeight = FontWeight(600),
                 color = textColor,
             )
@@ -114,21 +114,24 @@ fun BudgetCreate(navController: NavController) {
             ) {
                 CategorySpinner(category.value) { newCategory -> category.value = newCategory }
                 ValidateBtn("Continue") {
-                    val newBudget = Budget(
-                        id = 0,
-                        amount = if (amount.value != "") amount.value.toFloat() else 0f,
-                        currency = if (isEuro.value) Constants.Currencies.EUR.currencyName else Constants.Currencies.TRY.currencyName,
-                        spent = 0f,
-                        category = category.value
-                    )
                     CoroutineScope(Dispatchers.IO).launch {
-                        if (newBudget.amount > 0f) database.budgetDao()
-                            .insert(newBudget.toBudgetEntity())
+                        if (budget.amount > 0f) {
+                            val budgetToEdit = database.budgetDao().getById(budget.id)
+                            budgetToEdit.amount = amount.value.toFloat()
+                            budgetToEdit.category = category.value
+                            budgetToEdit.currency =
+                                if (isEuro.value) Constants.Currencies.EUR.currencyName else Constants.Currencies.TRY.currencyName
+
+                            database.budgetDao().update(budgetToEdit)
+                        }
                         withContext(Dispatchers.Main) {
+                            navController.popBackStack()
                             navController.popBackStack()
                         }
                     }
                 }
+
+
             }
         }
     }
@@ -137,6 +140,6 @@ fun BudgetCreate(navController: NavController) {
 
 @Preview
 @Composable
-fun CreatePreview() {
-    BudgetCreate(rememberNavController())
+fun EditPreview() {
+    BudgetEdit(rememberNavController(), Constants.getBudgets()[0])
 }

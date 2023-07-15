@@ -39,7 +39,6 @@ fun ExpenseDetails(navController: NavHostController, expense: Expense) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Header({ navController.popBackStack() }, expense)
-        Description(expense.images?.get(0))
         Spacer(
             modifier = Modifier
                 .height(50.dp)
@@ -87,8 +86,9 @@ fun Header(onClick: () -> Unit, expense: Expense) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            val currencySymbol = Constants.Currencies.valueOf(expense.currency).symbol
             Text(
-                text = expense.amount.toString(),
+                text = "${expense.amount} $currencySymbol",
                 color = textColor,
                 fontSize = 48.sp,
                 fontWeight = FontWeight(500)
