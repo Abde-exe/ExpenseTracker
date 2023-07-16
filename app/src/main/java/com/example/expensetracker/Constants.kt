@@ -45,6 +45,7 @@ object Constants {
     fun getExpenses(): MutableList<Expense> {
 
         val e1 = Expense(
+            id = 0,
             title = "title1",
             description = "",
             amount = 1000f,
@@ -52,10 +53,11 @@ object Constants {
             changedAmount = 1000f * 28f,
             category = Categories.TRANSP.categoryName,
             paymentType =  PaymentType.CARD.typeName,
-            date = Date(),
-            images = null
+            date = Date().time
+            //, images = null
         )
         val e2 = Expense(
+            id = 1,
             title = "title2",
             description = "",
             amount = 10000f,
@@ -63,8 +65,8 @@ object Constants {
             changedAmount = 10000f * 0.035f,
             category = Categories.SHOPPING.categoryName,
             paymentType =  PaymentType.CASH.typeName,
-            date = Date(),
-            images = null
+            date = Date().time
+            //, images = null
         )
 
 

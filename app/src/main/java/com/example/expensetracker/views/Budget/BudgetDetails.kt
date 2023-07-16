@@ -81,7 +81,7 @@ fun BudgetDetails(navController: NavController, budget: Budget) {
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Details(budget.category, budget.amount, budget.currency)
+            Details(budget.category, budget.amount, budget.currency, budget.spent)
             ValidateBtn("Edit") { navController.navigate(BudgetScreen.Edit.passBudget(budget)) }
         }
 
@@ -89,7 +89,7 @@ fun BudgetDetails(navController: NavController, budget: Budget) {
 }
 
 @Composable
-fun Details(category: String, amount: Float, currency: String) {
+fun Details(category: String, amount: Float, currency: String, spent : Float) {
     val symbol =
         if (currency == "EUR") Constants.Currencies.EUR.symbol else Constants.Currencies.TRY.symbol
     Column(
@@ -138,13 +138,14 @@ fun Details(category: String, amount: Float, currency: String) {
                 color = Color(0xFF0D0E0F),
             )
         )
+        val budgetProg = spent / amount
         LinearProgressIndicator(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(12.dp),
-            // color = Color.Yellow,
-            backgroundColor =
-            Color.Blue
+            color = Color.Blue,
+            backgroundColor = Color.Gray,
+            progress = budgetProg
         )
     }
 }

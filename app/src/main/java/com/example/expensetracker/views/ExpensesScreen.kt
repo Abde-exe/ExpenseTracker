@@ -8,10 +8,12 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -19,14 +21,30 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.expensetracker.database.AppDatabaseSingleton
+import com.example.expensetracker.models.Expense
+import com.example.expensetracker.models.toBudgets
+import com.example.expensetracker.models.toExpenses
 import com.example.expensetracker.views.BottomSheet
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.math.exp
 
 
-var expenses = Constants.getExpenses()
+ private lateinit var expenses: List<Expense>
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ExpensesScreen(navController: NavController) {
+    val database = AppDatabaseSingleton.getInstance(LocalContext.current)
+
+    LaunchedEffect(Unit) {
+        expenses = withContext(Dispatchers.IO) {
+            database.expenseDao().getAllExpenses().toExpenses()
+        }
+    }
+
     val sheetState = rememberBottomSheetState(
         initialValue = BottomSheetValue.Collapsed
     )
@@ -86,7 +104,7 @@ fun Sections(navController: NavController, sheetState: BottomSheetState) {
                 color = Color(0xFF0D0E0F),
                 modifier = Modifier.padding(16.dp)
             )
-            ExpensesList(navController)
+          //  ExpensesList(navController, expenses)
             Text(
                 "Yesterday",
                 fontWeight = FontWeight(600),
@@ -94,7 +112,7 @@ fun Sections(navController: NavController, sheetState: BottomSheetState) {
                 color = Color(0xFF0D0E0F),
                 modifier = Modifier.padding(16.dp)
             )
-            ExpensesList(navController)
+            //ExpensesList(navController, expenses)
 
 
         }
@@ -103,10 +121,10 @@ fun Sections(navController: NavController, sheetState: BottomSheetState) {
 }
 
 @Composable
-fun ExpensesList(navController: NavController) {
+fun ExpensesList(navController: NavController, expenses: List<Expense>) {
     LazyColumn {
-        items(expenses){expense->
-            ExpenseItem({navController.navigate("EXPENSEDETAILS/$expense")}, expense)
+        items(expenses) { expense ->
+            ExpenseItem({ navController.navigate("EXPENSEDETAILS/$expense") }, expense)
         }
     }
 }

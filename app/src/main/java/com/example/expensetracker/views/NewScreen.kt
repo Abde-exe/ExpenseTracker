@@ -32,8 +32,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.example.expensetracker.database.AppDatabaseSingleton
 import com.example.expensetracker.models.Expense
+import com.example.expensetracker.models.toExpenseEntity
 import com.example.expensetracker.views.ValidateBtn
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.*
 
 private var header = Color(0xFFFD3C4A)
@@ -41,6 +47,7 @@ private var textColor = Color(0xFFFCFCFC)
 
 @Composable
 fun NewScreen(navController: NavHostController) {
+
     val amount: MutableState<String> = remember {
         mutableStateOf("0")
     }
@@ -63,6 +70,7 @@ fun NewScreen(navController: NavHostController) {
 
 @Composable
 fun Header(onClick: () -> Unit, amount: MutableState<String>) {
+
     Column {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -94,7 +102,7 @@ fun Header(onClick: () -> Unit, amount: MutableState<String>) {
             modifier = Modifier
                 .background(header, shape = RoundedCornerShape(0.dp, 0.dp, 16.dp, 16.dp))
                 .fillMaxWidth()
-                .height(280.dp)
+                .height(200.dp)
                 .padding(24.dp, 0.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
@@ -111,6 +119,8 @@ fun Header(onClick: () -> Unit, amount: MutableState<String>) {
 
 @Composable
 fun Form(navController: NavHostController, amount: MutableState<String>) {
+    val database = AppDatabaseSingleton.getInstance(LocalContext.current)
+
     val category: MutableState<String> = remember {
         mutableStateOf(Constants.Categories.SHOPPING.categoryName)
     }
@@ -154,6 +164,7 @@ fun Form(navController: NavHostController, amount: MutableState<String>) {
             ValidateBtn("Continue") {
                 val amountF = amount.value.toFloat()
                 val newExpense = Expense(
+                    id = 0,
                     title = title.value,
                     description = "",
                     amount = if (amount.value != "") amountF else 0f,
@@ -161,11 +172,16 @@ fun Form(navController: NavHostController, amount: MutableState<String>) {
                     changedAmount = if (isEuro.value) amountF * 28.34f else amountF * 0.035f,
                     category = category.value,
                     paymentType = type.value,
-                    date = Date(),
-                    images = null
+                    date = Date().time
+                    //,images = null
                 )
-                Constants.addExpense(newExpense)
-                navController.popBackStack()
+                CoroutineScope(Dispatchers.IO).launch {
+                    if (newExpense.amount > 0f) database.expenseDao()
+                        .insert(newExpense.toExpenseEntity())
+                    withContext(Dispatchers.Main) {
+                        navController.popBackStack()
+                    }
+                }
             }
 
         }
@@ -245,7 +261,7 @@ enum class CategoryItems(val title: String) {
 }
 
 @Composable
-fun CategorySpinner(selectedCategory: String, onCategorySelected:(String)->Unit) {
+fun CategorySpinner(selectedCategory: String, onCategorySelected: (String) -> Unit) {
     val selectedOption = remember { mutableStateOf(selectedCategory) }
     val options = remember {
         mutableStateListOf(

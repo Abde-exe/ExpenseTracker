@@ -1,5 +1,6 @@
 package com.example.expensetracker
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -7,22 +8,26 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.expensetracker.database.AppDatabaseSingleton
 import com.example.expensetracker.models.Expense
+import com.example.expensetracker.models.toExpenses
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.*
 
 private val color_item_bg = Color(0xfff1f1fa)
-
-
 
 
 @Composable
@@ -42,7 +47,7 @@ fun HomeContent(navController: NavController) {
 //components
 
 @Composable
-fun CurrencyChange(){
+fun CurrencyChange() {
     Column(
         modifier = Modifier.padding(8.dp)
     ) {
@@ -55,7 +60,7 @@ fun CurrencyChange(){
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
-        ){
+        ) {
             Text(
                 text = "1€ = ",
                 fontSize = 20.sp,
@@ -75,7 +80,7 @@ fun CurrencyChange(){
                 .fillMaxWidth()
                 .padding(0.dp, 0.dp, 0.dp, 16.dp),
             horizontalArrangement = Arrangement.Center
-        ){
+        ) {
             Text(
                 text = "1₺ = ",
                 fontSize = 20.sp,
@@ -93,9 +98,8 @@ fun CurrencyChange(){
     }
 
 
-
-
 }
+
 @Composable
 fun Balance(amount: Float, spent: Float) {
     Text(
@@ -184,7 +188,16 @@ fun Balance(amount: Float, spent: Float) {
 }
 
 @Composable
-fun TodayExpenses(navController : NavController){
+fun TodayExpenses(navController: NavController) {
+    lateinit var expenses: List<Expense>
+
+    var database = AppDatabaseSingleton.getInstance(LocalContext.current)
+    LaunchedEffect(Unit) {
+        expenses = withContext(Dispatchers.IO) {
+            database.expenseDao().getAllExpenses().toExpenses()
+        }
+        Log.d("test", expenses[0].amount.toString())
+    }
     Text(
         "Today's expenses",
         fontWeight = FontWeight(600),
@@ -192,7 +205,8 @@ fun TodayExpenses(navController : NavController){
         color = Color(0xFF0D0E0F),
         modifier = Modifier.padding(8.dp)
     )
-    ExpensesList(navController)
+
+    ExpensesList(navController, expenses)
 }
 
 
@@ -214,7 +228,8 @@ fun ExpenseItem(onClick: () -> Unit, expense: Expense) {
                 painter = icon, contentDescription = "expenseItem",
                 modifier = Modifier
                     .height(70.dp)
-                    .width(70.dp))
+                    .width(70.dp)
+            )
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -255,7 +270,8 @@ fun ExpenseItem(onClick: () -> Unit, expense: Expense) {
                         textAlign = TextAlign.End,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    val formattedDate = SimpleDateFormat("HH:mm", Locale.getDefault()).format(expense.date)
+                    val formattedDate =
+                        SimpleDateFormat("HH:mm", Locale.getDefault()).format(expense.date)
                     Text(
                         text = formattedDate,
                         fontSize = 13.sp,

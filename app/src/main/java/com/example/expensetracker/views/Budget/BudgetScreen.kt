@@ -67,8 +67,7 @@ fun BudgetScreen(navController: NavHostController) {
                         .fillMaxWidth()
                         .height(8.dp)
                 )
-            }
-            else{
+            } else {
                 BudgetsList(navController)
             }
             ValidateBtn("Create a budget") { navController.navigate(BudgetScreen.Create.route) }
@@ -125,9 +124,9 @@ fun BudgetCard(navController: NavHostController, budget: Budget) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(12.dp),
-            //color = Color.Yellow,
-            backgroundColor =
-            Color.Blue
+            color = Color.Blue,
+            backgroundColor = Color.Gray,
+            progress = budget.spent / budget.amount
         )
         Text(
             text = "${budget.spent} of ${budget.amount}€",

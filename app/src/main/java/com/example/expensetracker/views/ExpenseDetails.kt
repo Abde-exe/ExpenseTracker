@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,9 +23,15 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.expensetracker.database.AppDatabaseSingleton
 import com.example.expensetracker.models.Expense
 import com.example.expensetracker.views.ValidateBtn
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.net.URL
+import java.nio.file.Files.delete
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -50,6 +57,8 @@ fun ExpenseDetails(navController: NavHostController, expense: Expense) {
 
 @Composable
 fun Header(onClick: () -> Unit, expense: Expense) {
+    val database = AppDatabaseSingleton.getInstance(LocalContext.current)
+
     Box() {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -75,6 +84,15 @@ fun Header(onClick: () -> Unit, expense: Expense) {
                 imageVector = Icons.Default.Delete,
                 contentDescription = "delete",
                 tint = textColor,
+                modifier = Modifier.clickable {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val expenseToDelete = database.expenseDao().getById(expense.id)
+                        database.expenseDao().delete(expenseToDelete)
+                        withContext(Dispatchers.Main) {
+                            onClick()
+                        }
+                    }
+                }
             )
 
         }
@@ -94,7 +112,8 @@ fun Header(onClick: () -> Unit, expense: Expense) {
                 fontWeight = FontWeight(500)
             )
             Text(text = expense.title, color = textColor, fontSize = 16.sp)
-            val formattedDate = SimpleDateFormat("dd/MM, HH:mm", Locale.getDefault()).format(expense.date)
+            val formattedDate =
+                SimpleDateFormat("dd/MM, HH:mm", Locale.getDefault()).format(expense.date)
 
             Text(text = formattedDate, color = textColor, fontSize = 13.sp)
 
@@ -150,7 +169,7 @@ fun Header(onClick: () -> Unit, expense: Expense) {
 }
 
 @Composable
-fun Description(expenseImg : URL?) {
+fun Description(expenseImg: URL?) {
     Column(
         verticalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier
