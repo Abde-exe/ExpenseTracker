@@ -38,9 +38,9 @@ fun BudgetScreen(navController: NavHostController) {
     val database = AppDatabaseSingleton.getInstance(LocalContext.current)
     val budgetDAO = database.budgetDao()
     LaunchedEffect(Unit) {
-        budgets = withContext(Dispatchers.IO)
+        withContext(Dispatchers.IO)
         {
-            budgetDAO.getAllBudgets().toBudgets()
+            budgets = budgetDAO.getAllBudgets().toBudgets()
         }
     }
     Column(
@@ -61,7 +61,7 @@ fun BudgetScreen(navController: NavHostController) {
                 .fillMaxWidth()
                 .background(Color.White, shape = RoundedCornerShape(24.dp, 24.dp, 0.dp, 0.dp))
         ) {
-            if (budgets == null) {
+            if (budgets.isNullOrEmpty()) {
                 LinearProgressIndicator(
                     modifier = Modifier
                         .fillMaxWidth()

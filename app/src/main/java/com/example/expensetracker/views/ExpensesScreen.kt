@@ -1,5 +1,6 @@
 package com.example.expensetracker
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -7,9 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,17 +31,21 @@ import kotlinx.coroutines.withContext
 import kotlin.math.exp
 
 
- private lateinit var expenses: List<Expense>
+
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ExpensesScreen(navController: NavController) {
     val database = AppDatabaseSingleton.getInstance(LocalContext.current)
+    var expenses : List<Expense>  by remember{ mutableStateOf(emptyList()) }
 
     LaunchedEffect(Unit) {
-        expenses = withContext(Dispatchers.IO) {
-            database.expenseDao().getAllExpenses().toExpenses()
+         withContext(Dispatchers.IO) {
+             expenses =   database.expenseDao().getAllExpenses().toExpenses()
         }
+    }
+    if (expenses.isNotEmpty()) {
+        Log.d("test", expenses[0].amount.toString())
     }
 
     val sheetState = rememberBottomSheetState(
@@ -58,13 +61,13 @@ fun ExpensesScreen(navController: NavController) {
         sheetContent = {
             BottomSheet()
         }) {
-        Sections(navController, sheetState)
+        Sections(navController, sheetState, expenses)
     }
 }
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun Sections(navController: NavController, sheetState: BottomSheetState) {
+fun Sections(navController: NavController, sheetState: BottomSheetState, expenses: List<Expense>) {
     val scope = rememberCoroutineScope()
     Box(
         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
@@ -95,25 +98,31 @@ fun Sections(navController: NavController, sheetState: BottomSheetState) {
             }
 
         }
-        Column() {
-
-            Text(
-                "Today",
-                fontWeight = FontWeight(600),
-                fontSize = 18.sp,
-                color = Color(0xFF0D0E0F),
-                modifier = Modifier.padding(16.dp)
-            )
-          //  ExpensesList(navController, expenses)
-            Text(
-                "Yesterday",
-                fontWeight = FontWeight(600),
-                fontSize = 18.sp,
-                color = Color(0xFF0D0E0F),
-                modifier = Modifier.padding(16.dp)
-            )
-            //ExpensesList(navController, expenses)
-
+        Column {
+            if (expenses == null) {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                )
+            } else {
+                Text(
+                    "Today",
+                    fontWeight = FontWeight(600),
+                    fontSize = 18.sp,
+                    color = Color(0xFF0D0E0F),
+                    modifier = Modifier.padding(16.dp)
+                )
+                ExpensesList(navController, expenses)
+                Text(
+                    "Yesterday",
+                    fontWeight = FontWeight(600),
+                    fontSize = 18.sp,
+                    color = Color(0xFF0D0E0F),
+                    modifier = Modifier.padding(16.dp)
+                )
+                ExpensesList(navController, expenses)
+            }
 
         }
 

@@ -7,8 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -189,15 +188,18 @@ fun Balance(amount: Float, spent: Float) {
 
 @Composable
 fun TodayExpenses(navController: NavController) {
-    lateinit var expenses: List<Expense>
+     var expenses : List<Expense>  by remember{ mutableStateOf(emptyList()) }
 
     var database = AppDatabaseSingleton.getInstance(LocalContext.current)
     LaunchedEffect(Unit) {
-        expenses = withContext(Dispatchers.IO) {
-            database.expenseDao().getAllExpenses().toExpenses()
+        withContext(Dispatchers.IO) {
+            expenses =    database.expenseDao().getAllExpenses().toExpenses()
         }
+    }
+    if (expenses.isNotEmpty()) {
         Log.d("test", expenses[0].amount.toString())
     }
+
     Text(
         "Today's expenses",
         fontWeight = FontWeight(600),

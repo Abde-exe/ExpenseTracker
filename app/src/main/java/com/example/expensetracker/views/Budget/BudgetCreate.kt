@@ -85,7 +85,7 @@ fun BudgetCreate(navController: NavController) {
             )
 
         }
-        Spacer(modifier = Modifier.height(250.dp))
+        //Spacer(modifier = Modifier.height(250.dp))
         Column(modifier = Modifier.padding(16.dp)) {
 
             Text(
