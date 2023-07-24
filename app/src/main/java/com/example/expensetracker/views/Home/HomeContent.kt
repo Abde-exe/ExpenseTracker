@@ -1,28 +1,36 @@
 package com.example.expensetracker
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.example.expensetracker.database.AppDatabaseSingleton
+import com.example.expensetracker.models.Expense
+import com.example.expensetracker.models.toExpenses
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.text.SimpleDateFormat
+import java.util.*
 
 private val color_item_bg = Color(0xfff1f1fa)
 
 
-
-
 @Composable
-fun HomeContent(onClick : ()->Unit) {
+fun HomeContent(navController: NavController) {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -30,7 +38,7 @@ fun HomeContent(onClick : ()->Unit) {
         Column {
             CurrencyChange()
             Balance(1000.00f, 10.00f)
-            TodayExpenses(onClick)
+            TodayExpenses(navController)
         }
     }
 }
@@ -38,7 +46,7 @@ fun HomeContent(onClick : ()->Unit) {
 //components
 
 @Composable
-fun CurrencyChange(){
+fun CurrencyChange() {
     Column(
         modifier = Modifier.padding(8.dp)
     ) {
@@ -51,7 +59,7 @@ fun CurrencyChange(){
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
-        ){
+        ) {
             Text(
                 text = "1€ = ",
                 fontSize = 20.sp,
@@ -67,10 +75,11 @@ fun CurrencyChange(){
                 )
         }
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(0.dp, 0.dp, 0.dp, 16.dp),
             horizontalArrangement = Arrangement.Center
-        ){
+        ) {
             Text(
                 text = "1₺ = ",
                 fontSize = 20.sp,
@@ -88,9 +97,8 @@ fun CurrencyChange(){
     }
 
 
-
-
 }
+
 @Composable
 fun Balance(amount: Float, spent: Float) {
     Text(
@@ -179,7 +187,19 @@ fun Balance(amount: Float, spent: Float) {
 }
 
 @Composable
-fun TodayExpenses(onClick: () -> Unit){
+fun TodayExpenses(navController: NavController) {
+     var expenses : List<Expense>  by remember{ mutableStateOf(emptyList()) }
+
+    var database = AppDatabaseSingleton.getInstance(LocalContext.current)
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            expenses =    database.expenseDao().getAllExpenses().toExpenses()
+        }
+    }
+    if (expenses.isNotEmpty()) {
+        Log.d("test", expenses[0].amount.toString())
+    }
+
     Text(
         "Today's expenses",
         fontWeight = FontWeight(600),
@@ -187,13 +207,14 @@ fun TodayExpenses(onClick: () -> Unit){
         color = Color(0xFF0D0E0F),
         modifier = Modifier.padding(8.dp)
     )
-    ExpensesList(count = 3, onClick = onClick)
+
+    ExpensesList(navController, expenses)
 }
 
 
 //subcomponents
 @Composable
-fun ExpenseItem(onClick: () -> Unit) {
+fun ExpenseItem(onClick: () -> Unit, expense: Expense) {
     Row(
         modifier = Modifier
             .padding(24.dp, 8.dp)
@@ -209,7 +230,8 @@ fun ExpenseItem(onClick: () -> Unit) {
                 painter = icon, contentDescription = "expenseItem",
                 modifier = Modifier
                     .height(70.dp)
-                    .width(70.dp))
+                    .width(70.dp)
+            )
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -222,16 +244,16 @@ fun ExpenseItem(onClick: () -> Unit) {
                     modifier = Modifier
                         .padding(8.dp, 0.dp)
                         .fillMaxHeight(),
-                    verticalArrangement = Arrangement.SpaceBetween
+                    verticalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Text(
-                        text = "Shopping",
+                        text = expense.category,
                         fontSize = 16.sp,
                         fontWeight = FontWeight(500),
                         color = Color(0xFF292B2D)
                     )
                     Text(
-                        text = "Buy some grocery",
+                        text = expense.title,
                         fontSize = 13.sp,
                         fontWeight = FontWeight(500),
                         color = Color(0xFF91919F)
@@ -239,19 +261,26 @@ fun ExpenseItem(onClick: () -> Unit) {
                 }
                 Column(
                     modifier = Modifier.fillMaxHeight(),
-                    verticalArrangement = Arrangement.SpaceBetween
+                    verticalArrangement = Arrangement.SpaceEvenly
                 ) {
+                    val currencySymbol = Constants.Currencies.valueOf(expense.currency).symbol
                     Text(
-                        text = "- $120",
+                        text = "${expense.amount} $currencySymbol",
                         fontSize = 16.sp,
                         fontWeight = FontWeight(600),
-                        color = Color(0xFFFD3C4A)
+                        color = Color(0xFFFD3C4A),
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.fillMaxWidth()
                     )
+                    val formattedDate =
+                        SimpleDateFormat("HH:mm", Locale.getDefault()).format(expense.date)
                     Text(
-                        text = "10:00 AM",
+                        text = formattedDate,
                         fontSize = 13.sp,
                         fontWeight = FontWeight(500),
-                        color = Color(0xFF91919F)
+                        color = Color(0xFF91919F),
+                        textAlign = TextAlign.End,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 }
             }

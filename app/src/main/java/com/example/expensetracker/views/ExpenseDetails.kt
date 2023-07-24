@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -22,17 +23,29 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import com.example.expensetracker.database.AppDatabaseSingleton
+import com.example.expensetracker.models.Expense
 import com.example.expensetracker.views.ValidateBtn
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.URL
+import java.nio.file.Files.delete
+import java.text.SimpleDateFormat
+import java.util.*
 
 private var header = Color(0xFFFD3C4A)
 private var textColor = Color(0xFFFCFCFC)
 private var subTextColor = Color(0xFF91919F)
 
 @Composable
-fun ExpenseDetails(navController: NavHostController) {
-    Column(modifier = Modifier.fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Header(navController)
-        Description()
+fun ExpenseDetails(navController: NavHostController, expense: Expense) {
+    Column(
+        modifier = Modifier.fillMaxHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Header({ navController.popBackStack() }, expense)
         Spacer(
             modifier = Modifier
                 .height(50.dp)
@@ -43,7 +56,9 @@ fun ExpenseDetails(navController: NavHostController) {
 }
 
 @Composable
-fun Header(navController: NavHostController) {
+fun Header(onClick: () -> Unit, expense: Expense) {
+    val database = AppDatabaseSingleton.getInstance(LocalContext.current)
+
     Box() {
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -57,7 +72,7 @@ fun Header(navController: NavHostController) {
                 contentDescription = "arrowback",
                 tint = textColor,
                 modifier = Modifier.clickable {
-                    navController.popBackStack()
+                    onClick()
                 }
             )
             Text(
@@ -69,6 +84,15 @@ fun Header(navController: NavHostController) {
                 imageVector = Icons.Default.Delete,
                 contentDescription = "delete",
                 tint = textColor,
+                modifier = Modifier.clickable {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val expenseToDelete = database.expenseDao().getById(expense.id)
+                        database.expenseDao().delete(expenseToDelete)
+                        withContext(Dispatchers.Main) {
+                            onClick()
+                        }
+                    }
+                }
             )
 
         }
@@ -80,14 +104,18 @@ fun Header(navController: NavHostController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            val currencySymbol = Constants.Currencies.valueOf(expense.currency).symbol
             Text(
-                text = "120$",
+                text = "${expense.amount} $currencySymbol",
                 color = textColor,
                 fontSize = 48.sp,
                 fontWeight = FontWeight(500)
             )
-            Text(text = "buy some groceries", color = textColor, fontSize = 16.sp)
-            Text(text = "Saturday 5 june 2023 16:20", color = textColor, fontSize = 13.sp)
+            Text(text = expense.title, color = textColor, fontSize = 16.sp)
+            val formattedDate =
+                SimpleDateFormat("dd/MM, HH:mm", Locale.getDefault()).format(expense.date)
+
+            Text(text = formattedDate, color = textColor, fontSize = 13.sp)
 
         }
         Row(
@@ -110,7 +138,7 @@ fun Header(navController: NavHostController) {
                     color = subTextColor,
                 )
                 Text(
-                    text = "Cash", fontSize = 16.sp,
+                    text = expense.paymentType, fontSize = 16.sp,
                     fontWeight = FontWeight(600)
                 )
             }
@@ -121,18 +149,18 @@ fun Header(navController: NavHostController) {
                     color = subTextColor,
                 )
                 Text(
-                    text = "Shopping", fontSize = 16.sp,
+                    text = expense.category, fontSize = 16.sp,
                     fontWeight = FontWeight(600)
                 )
             }
             Column {
                 Text(
-                    text = "Type", fontSize = 14.sp,
+                    text = "", fontSize = 14.sp,
                     fontWeight = FontWeight(500),
                     color = subTextColor,
                 )
                 Text(
-                    text = "Cash", fontSize = 16.sp,
+                    text = "", fontSize = 16.sp,
                     fontWeight = FontWeight(600)
                 )
             }
@@ -141,7 +169,7 @@ fun Header(navController: NavHostController) {
 }
 
 @Composable
-fun Description() {
+fun Description(expenseImg: URL?) {
     Column(
         verticalArrangement = Arrangement.SpaceEvenly,
         modifier = Modifier
@@ -167,19 +195,21 @@ fun Description() {
             fontWeight = FontWeight(600),
             color = subTextColor
         )
+        //val painter = expenseImg ?: painterResource(id = R.drawable.rectangle_207)
         val painter = painterResource(id = R.drawable.rectangle_207)
         Image(
             painter = painter,
-            contentDescription = "imgasset",
+            contentDescription = "imgAsset",
             modifier = Modifier
                 .fillMaxWidth()
                 .height(120.dp)
         )
+
     }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun DetailsPreview() {
-    ExpenseDetails(rememberNavController())
+    ExpenseDetails(rememberNavController(), Constants.getExpenses()[0])
 }

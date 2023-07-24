@@ -1,15 +1,18 @@
 package com.example.expensetracker.nav
 
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
+import androidx.navigation.*
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navigation
 import com.example.expensetracker.*
-import com.example.expensetracker.views.BudgetCreate
+import com.example.expensetracker.models.Budget
+import com.example.expensetracker.models.BudgetArgType
+import com.example.expensetracker.models.Expense
+import com.example.expensetracker.models.ExpenseArgtype
+import com.example.expensetracker.views.Budget.BudgetCreate
 import com.example.expensetracker.views.BudgetDetails
-
+import com.example.expensetracker.views.BudgetEdit
+import com.google.gson.Gson
 
 @Composable
 fun HomeNavGraph(navController: NavHostController) {
@@ -20,13 +23,13 @@ fun HomeNavGraph(navController: NavHostController) {
     ) {
 
         composable(route = BottomBarScreen.Home.route) {
-            HomeContent(onClick = { navController.navigate(Graph.EXPENSE) })
+            HomeContent(navController)
         }
         composable(route = BottomBarScreen.Expenses.route) {
-            ExpensesScreen(onClick = { navController.navigate(Graph.EXPENSE) })
+            ExpensesScreen(navController)
         }
         composable(route = BottomBarScreen.NewExpense.route) {
-            NewScreen(onClick = {navController.popBackStack()})
+            NewScreen(navController)
         }
         composable(route = BottomBarScreen.Report.route) {
             ReportScreen()
@@ -34,12 +37,11 @@ fun HomeNavGraph(navController: NavHostController) {
         composable(route = BottomBarScreen.Budget.route) {
             BudgetScreen(navController)
         }
-        detailsNavGraph(navController = navController)
+        detailsNavGraph(navController)
         budgetNavGraph(navController)
 
     }
 }
-
 
 
 fun NavGraphBuilder.detailsNavGraph(navController: NavHostController) {
@@ -47,30 +49,54 @@ fun NavGraphBuilder.detailsNavGraph(navController: NavHostController) {
         route = Graph.EXPENSE,
         startDestination = ExpenseScreen.Details.route
     ) {
-        composable(route = ExpenseScreen.Details.route) {
-            ExpenseDetails(navController = navController)
+        composable(route = ExpenseScreen.Details.route, listOf(navArgument("expense") {
+            type = ExpenseArgtype()
+        })) {
+            val expense: Expense? =
+                it.arguments?.getString("expense")?.let { Gson().fromJson(it, Expense::class.java) }
+            ExpenseDetails(navController, expense!!)
         }
     }
 }
+
 fun NavGraphBuilder.budgetNavGraph(navController: NavHostController) {
     navigation(
         route = Graph.BUDGET,
         startDestination = BudgetScreen.Details.route
     ) {
-        composable(route = BudgetScreen.Details.route) {
-            BudgetDetails(navController = navController)
+        composable(route = BudgetScreen.Details.route, arguments = listOf(navArgument("budget") {
+            type = BudgetArgType()
+        })) {
+            val budget: Budget? =
+                it.arguments?.getString("budget")?.let { Gson().fromJson(it, Budget::class.java) }
+            BudgetDetails(navController, budget!!)
         }
         composable(route = BudgetScreen.Create.route){
             BudgetCreate(navController)
+        }
+        composable(route = BudgetScreen.Edit.route, arguments = listOf(navArgument("budget") {
+            type = BudgetArgType()
+            defaultValue = Constants.getBudgets()[0]
+        })) {
+            val budget: Budget? =
+                it.arguments?.getString("budget")?.let { Gson().fromJson(it, Budget::class.java) }
+            //Log.d("test", budget?.amount.toString())
+            BudgetEdit(navController, budget!!)
         }
     }
 }
 
 sealed class ExpenseScreen(val route: String) {
-    object Details : ExpenseScreen(route = "DETAILS")
+    object Details : ExpenseScreen(route = "EXPENSEDETAILS/{expense}")
 }
+
 sealed class BudgetScreen(val route: String) {
-    object Details : BudgetScreen(route = "DETAILS")
+    object Details : BudgetScreen(route = "DETAILS/{budget}")
     object Create : BudgetScreen(route = "CREATE")
+    object Edit : BudgetScreen(route = "EDIT?budget={budget}"){
+        fun passBudget(budget: Budget):String{
+            return "EDIT?budget=$budget"
+        }
+    }
 }
 
