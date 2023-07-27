@@ -1,11 +1,13 @@
 package com.example.expensetracker
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -18,19 +20,27 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import coil.compose.AsyncImagePainter
+import coil.compose.AsyncImagePainter.State.Empty.painter
+import com.example.expensetracker.api.RetrofitInstance
+import com.example.expensetracker.api.getCurrencyData
 import com.example.expensetracker.database.AppDatabaseSingleton
 import com.example.expensetracker.models.Expense
 import com.example.expensetracker.models.toExpenses
+import com.example.expensetracker.viewmodels.HomeViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import retrofit2.Retrofit
 import java.text.SimpleDateFormat
 import java.util.*
 
 private val color_item_bg = Color(0xfff1f1fa)
-
+val viewModel = HomeViewModel()
 
 @Composable
-fun HomeContent(navController: NavController) {
+fun HomeContent(navController: NavController, homeViewModel: HomeViewModel = HomeViewModel()) {
+
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -47,7 +57,11 @@ fun HomeContent(navController: NavController) {
 
 @Composable
 fun CurrencyChange() {
+    var currencyData = viewModel.getData(LocalContext.current)!!
+    val sharedPref = LocalContext.current.getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
+
     Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.padding(8.dp)
     ) {
         Text(
@@ -56,6 +70,15 @@ fun CurrencyChange() {
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
+
+        val painter = painterResource(id = R.drawable.refresh_24)
+        Image(painter = painter, contentDescription = "refresh", modifier = Modifier.clickable {
+            currencyData = getCurrencyData()
+            val editor = sharedPref.edit()
+            editor.putFloat("rateTRY", currencyData.rate.toFloat())
+            editor.apply()
+        })
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
@@ -67,7 +90,7 @@ fun CurrencyChange() {
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "28,39₺",
+                text = String.format("%.2f", currencyData.rate) + " " + currencyData.otherCurrency,
                 fontSize = 20.sp,
                 fontWeight = FontWeight(600),
                 textAlign = TextAlign.Center,
@@ -87,7 +110,10 @@ fun CurrencyChange() {
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "0,035€",
+                text = String.format(
+                    "%.3f",
+                    1 / currencyData.rate
+                ) + " " + currencyData.baseCurrency,
                 fontSize = 20.sp,
                 fontWeight = FontWeight(600),
                 textAlign = TextAlign.Center,
@@ -188,12 +214,12 @@ fun Balance(amount: Float, spent: Float) {
 
 @Composable
 fun TodayExpenses(navController: NavController) {
-     var expenses : List<Expense>  by remember{ mutableStateOf(emptyList()) }
+    var expenses: List<Expense> by remember { mutableStateOf(emptyList()) }
 
     var database = AppDatabaseSingleton.getInstance(LocalContext.current)
     LaunchedEffect(Unit) {
         withContext(Dispatchers.IO) {
-            expenses =    database.expenseDao().getAllExpenses().toExpenses()
+            expenses = database.expenseDao().getAllExpenses().toExpenses()
         }
     }
     if (expenses.isNotEmpty()) {
