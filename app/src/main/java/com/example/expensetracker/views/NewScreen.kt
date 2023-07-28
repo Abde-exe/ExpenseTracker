@@ -1,5 +1,6 @@
 package com.example.expensetracker
 
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -51,14 +52,17 @@ fun NewScreen(navController: NavHostController) {
     val amount: MutableState<String> = remember {
         mutableStateOf("0")
     }
+    val isEuro: MutableState<Boolean> = remember {
+        mutableStateOf(true)
+    }
 
     Column(
         modifier = Modifier
             .fillMaxHeight()
             .background(header)
     ) {
-        Header({ navController.popBackStack() }, amount)
-        Form(navController, amount)
+        Header({ navController.popBackStack() }, amount, isEuro)
+        Form(navController, amount, isEuro)
         Spacer(
             modifier = Modifier
                 .height(50.dp)
@@ -69,7 +73,7 @@ fun NewScreen(navController: NavHostController) {
 }
 
 @Composable
-fun Header(onClick: () -> Unit, amount: MutableState<String>) {
+fun Header(onClick: () -> Unit, amount: MutableState<String>, isEuro:MutableState<Boolean>) {
 
     Column {
         Row(
@@ -112,14 +116,17 @@ fun Header(onClick: () -> Unit, amount: MutableState<String>) {
                     Alignment.Start
                 )
             )
-            AmountField({ newAmount -> amount.value = newAmount }, amount.value)
+            AmountField({ newAmount -> amount.value = newAmount }, amount.value, isEuro)
         }
     }
 }
 
 @Composable
-fun Form(navController: NavHostController, amount: MutableState<String>) {
+fun Form(navController: NavHostController, amount: MutableState<String>, isEuro: MutableState<Boolean>) {
     val database = AppDatabaseSingleton.getInstance(LocalContext.current)
+    val sharedPref = LocalContext.current.getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
+    val editor = sharedPref.edit()
+    val rateTRY = sharedPref.getFloat("rateTRY", 0f)
 
     val category: MutableState<String> = remember {
         mutableStateOf(Constants.Categories.SHOPPING.categoryName)
@@ -128,13 +135,11 @@ fun Form(navController: NavHostController, amount: MutableState<String>) {
         mutableStateOf("")
     }
     val type: MutableState<String> = remember {
-        mutableStateOf("")
+        mutableStateOf(Constants.PaymentType.CARD.typeName)
     }
     val photoUri: MutableState<Uri?> = remember { mutableStateOf(null) }
 
-    val isEuro: MutableState<Boolean> = remember {
-        mutableStateOf(true)
-    }
+
 
     Column(
         modifier = Modifier
@@ -163,25 +168,37 @@ fun Form(navController: NavHostController, amount: MutableState<String>) {
             ImagePicker(photoUri)
             ValidateBtn("Continue") {
                 val amountF = amount.value.toFloat()
+                var changedAmount = if (isEuro.value) amountF * rateTRY else amountF / rateTRY
                 val newExpense = Expense(
                     id = 0,
                     title = title.value,
                     description = "",
                     amount = if (amount.value != "") amountF else 0f,
                     currency = if (isEuro.value) Constants.Currencies.EUR.currencyName else Constants.Currencies.TRY.currencyName,
-                    changedAmount = if (isEuro.value) amountF * 28.34f else amountF * 0.035f,
+                    changedAmount = String.format("%.2f",changedAmount).toFloat(),
                     category = category.value,
                     paymentType = type.value,
                     date = Date().time
                     //,images = null
                 )
                 CoroutineScope(Dispatchers.IO).launch {
-                    if (newExpense.amount > 0f) database.expenseDao()
-                        .insert(newExpense.toExpenseEntity())
-                    withContext(Dispatchers.Main) {
-                        navController.popBackStack()
+                    if (newExpense.amount > 0f) {
+                        val amountSpent = if (isEuro.value) {
+                            newExpense.amount
+                        } else {
+                            newExpense.changedAmount
+                        }
+                        database.expenseDao().insert(newExpense.toExpenseEntity())
+
+                        val updatedSpent = sharedPref.getFloat("spent", 0f) + amountSpent
+                        editor.putFloat("spent", updatedSpent).apply() // Utilisez apply() pour sauvegarder immédiatement les changements dans les SharedPreferences.
+
+                        withContext(Dispatchers.Main) {
+                            navController.popBackStack()
+                        }
                     }
                 }
+
             }
 
         }
@@ -209,30 +226,36 @@ fun TitleField(title: MutableState<String>) {
     )
 }
 
+@Composable
+fun CurrencySwitch(isEuro:MutableState<Boolean>) {
+   // var isEuro: Boolean by remember { mutableStateOf(true) }
+    var currencyDrawable: Int by remember { mutableStateOf(R.drawable.baseline_euro_24) }
+    Button(contentPadding = PaddingValues(0.dp), onClick = {
+        if (isEuro.value) {
+            currencyDrawable = R.drawable.baseline_currency_lira_24
+            isEuro.value = false
+        } else {
+            currencyDrawable = R.drawable.baseline_euro_24
+            isEuro.value = true
+        }
+    }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent)) {
+        Icon(
+            painterResource(id = currencyDrawable),
+            contentDescription = "Euro Icon",
+            tint = Color.White,
+            modifier = Modifier.size(64.dp)
+        )
+    }
+
+}
 
 @Composable
-fun AmountField(onAmountChange: (String) -> Unit, initialAmount: String) {
-    var isEuro: Boolean by remember { mutableStateOf(true) }
-    var currencyDrawable: Int by remember { mutableStateOf(R.drawable.baseline_euro_24) }
+fun AmountField(onAmountChange: (String) -> Unit, initialAmount: String, isEuro:MutableState<Boolean>) {
+
     var text: String by remember { mutableStateOf(initialAmount) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Button(contentPadding = PaddingValues(0.dp), onClick = {
-            if (isEuro) {
-                currencyDrawable = R.drawable.baseline_currency_lira_24
-                isEuro = false
-            } else {
-                currencyDrawable = R.drawable.baseline_euro_24
-                isEuro = true
-            }
-        }, colors = ButtonDefaults.buttonColors(backgroundColor = Color.Transparent)) {
-            Icon(
-                painterResource(id = currencyDrawable),
-                contentDescription = "Euro Icon",
-                tint = Color.White,
-                modifier = Modifier.size(64.dp)
-            )
-        }
+        CurrencySwitch(isEuro = isEuro)
         OutlinedTextField(
             value = text,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),

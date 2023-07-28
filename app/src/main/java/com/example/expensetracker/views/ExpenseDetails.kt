@@ -1,5 +1,6 @@
 package com.example.expensetracker
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -58,6 +59,8 @@ fun ExpenseDetails(navController: NavHostController, expense: Expense) {
 @Composable
 fun Header(onClick: () -> Unit, expense: Expense) {
     val database = AppDatabaseSingleton.getInstance(LocalContext.current)
+    val sharedPref = LocalContext.current.getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
+    val editor = sharedPref.edit()
 
     Box() {
         Row(
@@ -88,6 +91,10 @@ fun Header(onClick: () -> Unit, expense: Expense) {
                     CoroutineScope(Dispatchers.IO).launch {
                         val expenseToDelete = database.expenseDao().getById(expense.id)
                         database.expenseDao().delete(expenseToDelete)
+                        val spent = sharedPref.getFloat("spent", 0f)
+                        val amountSpent = if (expense.currency == Constants.Currencies.EUR.currencyName) expense.amount
+                        else expense.changedAmount
+                        editor.putFloat("spent", spent - amountSpent).commit()
                         withContext(Dispatchers.Main) {
                             onClick()
                         }
@@ -111,7 +118,8 @@ fun Header(onClick: () -> Unit, expense: Expense) {
                 fontSize = 48.sp,
                 fontWeight = FontWeight(500)
             )
-            Text(text = expense.title, color = textColor, fontSize = 16.sp)
+            Text(text = expense.changedAmount.toString(), color = textColor, fontSize = 16.sp)
+            Text(text = expense.title, color = textColor, fontSize = 20.sp)
             val formattedDate =
                 SimpleDateFormat("dd/MM, HH:mm", Locale.getDefault()).format(expense.date)
 

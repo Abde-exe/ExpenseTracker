@@ -96,7 +96,7 @@ fun BudgetCreate(navController: NavController) {
                     color = Color(0xFFFCFCFC),
                 )
             )
-            AmountField(onAmountChange = { newAmount -> amount.value = newAmount }, amount.value)
+            AmountField(onAmountChange = { newAmount -> amount.value = newAmount }, amount.value, isEuro)
         }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

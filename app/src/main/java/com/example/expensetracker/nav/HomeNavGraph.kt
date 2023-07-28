@@ -32,7 +32,7 @@ fun HomeNavGraph(navController: NavHostController) {
             NewScreen(navController)
         }
         composable(route = BottomBarScreen.Report.route) {
-            ReportScreen()
+            ReportScreen(navController)
         }
         composable(route = BottomBarScreen.Budget.route) {
             BudgetScreen(navController)

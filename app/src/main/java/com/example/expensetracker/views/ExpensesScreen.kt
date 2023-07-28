@@ -114,14 +114,14 @@ fun Sections(navController: NavController, sheetState: BottomSheetState, expense
                     modifier = Modifier.padding(16.dp)
                 )
                 ExpensesList(navController, expenses)
-                Text(
+                /*Text(
                     "Yesterday",
                     fontWeight = FontWeight(600),
                     fontSize = 18.sp,
                     color = Color(0xFF0D0E0F),
                     modifier = Modifier.padding(16.dp)
                 )
-                ExpensesList(navController, expenses)
+                ExpensesList(navController, expenses)*/
             }
 
         }
