@@ -41,9 +41,9 @@ val viewModel = HomeViewModel()
 fun HomeContent(navController: NavController, homeViewModel: HomeViewModel = HomeViewModel()) {
 
 
-    Box(
+    Column(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        verticalArrangement = Arrangement.Top
     ) {
         Column {
             CurrencyChange()
@@ -57,7 +57,9 @@ fun HomeContent(navController: NavController, homeViewModel: HomeViewModel = Hom
 
 @Composable
 fun CurrencyChange() {
-    var currencyData = viewModel.getData(LocalContext.current)!!
+    var currencyData = viewModel.getCurrencyPref(LocalContext.current)!!
+    var rateTRY by remember { mutableStateOf(currencyData.rate.toFloat()) }
+
     val sharedPref = LocalContext.current.getSharedPreferences("sharedPref", Context.MODE_PRIVATE)
 
     Column(
@@ -74,8 +76,9 @@ fun CurrencyChange() {
         val painter = painterResource(id = R.drawable.refresh_24)
         Image(painter = painter, contentDescription = "refresh", modifier = Modifier.clickable {
             currencyData = getCurrencyData()
+            rateTRY = currencyData.rate.toFloat()
             val editor = sharedPref.edit()
-            editor.putFloat("rateTRY", currencyData.rate.toFloat())
+            editor.putFloat("rateTRY", rateTRY)
             editor.apply()
         })
 
@@ -90,7 +93,7 @@ fun CurrencyChange() {
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = String.format("%.2f", currencyData.rate) + " " + currencyData.otherCurrency,
+                text = String.format("%.2f", rateTRY) + " " + currencyData.otherCurrency,
                 fontSize = 20.sp,
                 fontWeight = FontWeight(600),
                 textAlign = TextAlign.Center,
@@ -112,7 +115,7 @@ fun CurrencyChange() {
             Text(
                 text = String.format(
                     "%.3f",
-                    1 / currencyData.rate
+                    1 / rateTRY
                 ) + " " + currencyData.baseCurrency,
                 fontSize = 20.sp,
                 fontWeight = FontWeight(600),
@@ -127,6 +130,10 @@ fun CurrencyChange() {
 
 @Composable
 fun Balance(amount: Float, spent: Float) {
+
+    var budgetTotal = viewModel.getTotalBudgetPref(LocalContext.current)
+    var spent = viewModel.getSpentPref(LocalContext.current)
+
     Text(
         text = "Budget",
         color = Color(0xFF91919F),
@@ -134,7 +141,7 @@ fun Balance(amount: Float, spent: Float) {
         modifier = Modifier.fillMaxWidth()
     )
     Text(
-        text = "$amount €",
+        text = "$budgetTotal €",
         fontSize = 40.sp,
         fontWeight = FontWeight(600),
         textAlign = TextAlign.Center,
@@ -170,7 +177,7 @@ fun Balance(amount: Float, spent: Float) {
                     color = Color(0xFFFCFCFC)
                 )
                 Text(
-                    text = "${amount - spent} €",
+                    text = "${budgetTotal - spent} €",
                     fontSize = 22.sp,
                     fontWeight = FontWeight(600),
                     color = Color(0xFFFCFCFC)
